@@ -6,7 +6,7 @@ import pyfiglet
 
 Welcome = "welcome to the Application"
 init(autoreset=True)
-
+utils.build_database()
 for i in range(3):
     # ==========start-of-choice-handling==========
     print(Fore.YELLOW + pyfiglet.figlet_format(Welcome))
