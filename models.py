@@ -154,11 +154,44 @@ def edit_user(admin_username, admin_password_hash):  # edit user funcrion
         break
 
 
-def delete_user(username):
+def delete_user(username):  # delete user funcrion
 
     if utils.search_user(username):
-        conn = sqlite3.connect("db/Notes.db")
+        with sqlite3.connect("db/Notes.db") as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM USERS WHERE Username = ?", (username,))
+            conn.commit()
+            conn.close()
+
+
+####################################################section two#########################################################
+def add_new_notes(username):  # adding new note (all roles)
+    subject, note, tags = utils.get_notes()
+    with sqlite3.connect("db/Notes.db") as conn:
         cursor = conn.cursor()
-        cursor.execute("DELETE FROM USERS WHERE Username = ?", (username,))
+        cursor.execute(
+            "INSERT INTO NOTES (username , subject , note ,tags) VALUES(?,?,?,?)",
+            (username, subject, note, tags),
+        )
         conn.commit()
-        conn.close()
+
+
+def edit_note(id_choice):  # edit note by getting note id
+
+    subject, note, tags = utils.get_notes()
+    with sqlite3.connect("db/Notes.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "UPDATE NOTES SET subject=? , note = ? , tags = ? WHERE id = ? ",
+            (subject, note, tags, id_choice),
+        )
+        conn.commit()
+
+
+def delete_note(id_choice):  # delete note by getting note id
+    with sqlite3.connect("db/Notes.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM NOTES WHERE id = ? ", (id_choice,))
+        conn.commit()
+    print(Fore.GREEN + "Note successfully Delete it.")
+    input()

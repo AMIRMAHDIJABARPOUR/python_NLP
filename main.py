@@ -6,7 +6,7 @@ import models, utils, pyfiglet, sqlite3
 Welcome = "welcome to the Application"
 init(autoreset=True)
 utils.build_database()
-for i in range(3):
+while True:
     # ==========start-of-choice-handling==========
     print(Fore.YELLOW + pyfiglet.figlet_format(Welcome))
     print(
@@ -15,7 +15,7 @@ for i in range(3):
     )
     choice = int(input(Fore.YELLOW + "Please select an option: " + Style.RESET_ALL))
     # ==============User Management===============
-    if choice == 1:
+    if choice == 1:  # User Management condition
         print(Fore.BLUE + pyfiglet.figlet_format("User Management"))
         print(
             Fore.BLUE
@@ -30,27 +30,15 @@ for i in range(3):
         )
         if user_choice == 1:  # adding user
             models.add_user()
-            print(Fore.GREEN + "adding user successfully")
-            input()
         elif user_choice == 2:  # edit user(only admin , editor can edit)
-            while True:
-                username = input(Fore.YELLOW + "username: ")
-                if not utils.search_user(username):
-                    print(Fore.RED + "invalid username")
-                    input()
-                    continue
-                password = utils.get_password_with_username(username=username)
-                if not utils.guss_password(password):
-                    print(Fore.RED + "Incorrect password. Press Enter to try again...")
-                    input()
-                    continue
-                role = utils.get_role_with_username(username=username)
-                if not utils.check_promise(username, "admin", "editor"):
-                    print(Fore.RED + "you must be admin or editor to edit Uesr...")
-                    input()
-                else:
-                    models.edit_user(username, password)
-                    break
+            username, password, role = utils.login()
+            if role in ["admin", "editor"]:
+                models.edit_user(username, password)
+                break
+            else:
+                print(Fore.RED + "you must be admin or editor to edit Uesr...")
+                input()
+                continue
         elif user_choice == 3:  # delete user (only admin can delete user)
             my_username, password_hash, role = utils.login()
             if role == "admin":
@@ -74,11 +62,14 @@ for i in range(3):
         elif user_choice == 4:  # users list(all roles can see this part)
             conn = sqlite3.connect("db/Notes.db")
             cursor = conn.cursor()
-            Notes = cursor.execute(
-                "select U.username , N.note from USERS as U join NOTES as N on U.username=N.username"
-            )
-            for note in Notes:
-                print(Fore.BLUE + f"{note[0]} note : " + Fore.WHITE + note[1])
+            users = cursor.execute("SELECT username , role FROM USERS")
+            for user in users:
+                print(
+                    Fore.BLUE
+                    + f"username: {Fore.WHITE+user[0]} {Fore.LIGHTBLUE_EX}role : "
+                    + Fore.WHITE
+                    + user[1]
+                )
             print(Fore.LIGHTGREEN_EX + "press enter to continue...")
             input()
             continue
@@ -88,8 +79,126 @@ for i in range(3):
             utils.InvalidChoice()
     # ==============Notes Management===============
 
-    elif choice == 2:
-        print(Fore.GREEN + "User Management selected.")
+    elif choice == 2:  # Notes Management condition
+        print(Fore.BLUE + pyfiglet.figlet_format("Notes Management"))
+        print(
+            Fore.BLUE
+            + "********************************************************************"
+        )
+        print(
+            Fore.GREEN
+            + "[1] Add New Note\n[2] Edit Note \n[3] Delete Note\n[4] List All Notes\n[5] Back"
+        )
+        user_choice = int(input(Fore.YELLOW + "Please select an option: "))
+        if user_choice == 1:  # add note
+            username, password, role = utils.login()
+            models.add_new_notes(username)
+            print(Fore.GREEN + "adding note was successful ...")
+            input()
+        elif (
+            user_choice == 2
+        ):  # edit note(only editor and admin can edit all notes viewers can edit their own note)
+            username, password, role = utils.login()
+            if role == "admin" or role == "editor":
+                print(
+                    Fore.LIGHTYELLOW_EX
+                    + "Here are the notes. You should enter the note ID to edit it. 👇👇👇\n"
+                )
+                utils.print_all_notes()
+                while True:
+                    id_choice = int(
+                        input("Enter the ID of the note you want to edit: ")
+                    )
+                    if utils.check_id_in_notes(user_id=id_choice):
+                        models.edit_note(id_choice)
+                        print(Fore.GREEN + "\n Note was edited successfully...")
+                        input()
+                        break
+                    else:
+                        print(Fore.RED + "invalid id")
+                        input()
+                        continue
+            elif role == "viewer":
+                print(
+                    Fore.LIGHTYELLOW_EX
+                    + "Here are the notes. You should enter the note ID to edit it. 👇👇👇"
+                )
+                utils.print_user_notes(username=username)
+                while True:
+                    id_choice = int(input("Enter the ID of the note you want to edit."))
+                    if utils.check_id_in_notes(
+                        user_id=id_choice
+                    ) and utils.check_note_ownership(
+                        note_id=id_choice, username=username
+                    ):
+                        models.edit_note(id_choice)
+                        print(Fore.GREEN + "\n Note was edited successfully...")
+                        input()
+                        break
+                    else:
+                        print(Fore.RED + "invalid id")
+                        input()
+                        continue
+
+        elif (
+            user_choice == 3
+        ):  # DELETE note (Only users and admins can delete all notes; viewers can edit their own notes.)
+            username, password, role = utils.login()
+            if role == "admin" or role == "editor":
+                print(
+                    Fore.LIGHTYELLOW_EX
+                    + "Here are the notes. You should enter the note ID to DELETE it. 👇👇👇"
+                )
+                utils.print_all_notes()
+                while True:
+                    id_choice = int(
+                        input("Enter the ID of the note you want to Delete: ")
+                    )
+                    if utils.check_id_in_notes(user_id=id_choice):
+                        models.delete_note(id_choice)
+                        break
+                    else:
+                        print(Fore.RED + "invalid id...")
+                        input()
+                        continue
+            elif role == "viewer":
+                print(
+                    Fore.LIGHTYELLOW_EX
+                    + "Here are the notes. You should enter the note ID to Delete it. 👇👇👇"
+                )
+                utils.print_user_notes(username=username)
+                while True:
+                    id_choice = int(
+                        input("Enter the ID of the note you want to Delete: ")
+                    )
+                    if utils.check_id_in_notes(
+                        user_id=id_choice
+                    ) and utils.check_note_ownership(
+                        note_id=id_choice, username=username
+                    ):
+                        models.delete_note(id_choice)
+                        break
+                    else:
+                        print(Fore.RED + "invalid id...")
+                        input()
+                        continue
+
+        elif user_choice == 4:  # LIST OF NOTES (Viewers can see only their notes)
+            username, password, role = utils.login()
+            if role == "admin" or role == "editor":
+                utils.print_all_notes()
+                print(Fore.GREEN + "continue... ")
+                input()
+            elif role == "viewer":
+                utils.print_user_notes(username=username)
+                print(Fore.GREEN + "continue... ")
+                input()
+        elif user_choice == 5:
+            continue
+        else:
+            print(Fore.RED + "invalid choice...")
+            input()
+
     elif choice == 3:
         pass
     elif choice == 4:
@@ -102,5 +211,7 @@ for i in range(3):
         pass
     elif choice == 0:
         print(Fore.RED + "Goodbye...")
+        input()
+        break
     else:
         utils.InvalidChoice()

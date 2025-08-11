@@ -1,22 +1,19 @@
-import sqlite3
-import hashlib
+import sqlite3, hashlib, json
 from colorama import init, Fore
 
 init(autoreset=True)
 
 
 def build_database():  # creating database
-    conn = sqlite3.connect("db/Notes.db")
-    cursor = conn.cursor()
-    cursor.execute(
-        """
-                   CREATE TABLE IF NOT EXISTS USERS (username text primary key, password text , role text)
-                   """
-    )
-    cursor.execute(
-        """CREATE TABLE IF NOT EXISTS NOTES (id integer primary key,username TEXT, subject text, note text , FOREIGN KEY (username) REFERENCES USERS(username))"""
-    )
-    conn.commit()
+    with sqlite3.connect("db/Notes.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "CREATE TABLE IF NOT EXISTS USERS (username text primary key, password text , role text)"
+        )
+        cursor.execute(
+            """CREATE TABLE IF NOT EXISTS NOTES (id integer primary key AUTOINCREMENT ,username TEXT, subject text, note text ,Tags TEXT, FOREIGN KEY (username) REFERENCES USERS(username))"""
+        )
+        conn.commit()
 
 
 def InvalidChoice():  # when chice is not correct
@@ -24,21 +21,17 @@ def InvalidChoice():  # when chice is not correct
     input()
 
 
-def search_user(username):  # searching user in database(return boolian)
-    conn = sqlite3.connect("db/Notes.db")
-    cursor = conn.cursor()
-    cursor.execute(
-        """
-                   select u.username 
-                   from USERS as u
-                   where username =?
-                   """,
-        (username,),
-    )
-    if cursor.fetchall():
-        return True
-    else:
-        return False
+def search_user(username):  # searching username in database(return boolian)
+    with sqlite3.connect("db/Notes.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "select u.username from USERS as u   where username =?   ",
+            (username,),
+        )
+        if cursor.fetchall():
+            return True
+        else:
+            return False
 
 
 def password_to_hash(password):  # get password hash
@@ -48,13 +41,13 @@ def password_to_hash(password):  # get password hash
 def insert_add_user(
     username, password_hash, role
 ):  # insert data in USERS TABLE ON database
-    conn = sqlite3.connect("db/Notes.db")
-    cursor = conn.cursor()
-    cursor.execute(
-        "INSERT INTO USERS (username,password,role) VALUES (?,?,?)",
-        (username, password_hash, role),
-    )
-    conn.commit()
+    with sqlite3.connect("db/Notes.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO USERS (username,password,role) VALUES (?,?,?)",
+            (username, password_hash, role),
+        )
+        conn.commit()
 
 
 def set_username(
@@ -117,17 +110,17 @@ def set_role(massage):  # set valid role
 
 
 def get_password_with_username(username):  # get password hash with username
-    conn = sqlite3.connect("db/Notes.db")
-    cursor = conn.cursor()
-    cursor.execute("SELECT password FROM USERS WHERE username = ?", (username,))
-    return cursor.fetchone()[0]
+    with sqlite3.connect("db/Notes.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT password FROM USERS WHERE username = ?", (username,))
+        return cursor.fetchone()[0]
 
 
 def get_role_with_username(username):  # get user role with username
-    conn = sqlite3.connect("db/Notes.db")
-    cursor = conn.cursor()
-    cursor.execute("select role from USERS where username = ?", (username,))
-    return cursor.fetchone()[0]
+    with sqlite3.connect("db/Notes.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("select role from USERS where username = ?", (username,))
+        return cursor.fetchone()[0]
 
 
 def guss_password(true_password):  # chances to guss true password
@@ -145,13 +138,13 @@ def update_userpass(
     old_username, old_password, new_username, new_password, new_role
 ):  # updating True username and password
 
-    conn = sqlite3.connect("db/Notes.db")
-    cursor = conn.cursor()
-    cursor.execute(
-        "UPDATE USERS SET username = ?, password = ?, role = ? WHERE username = ? AND password = ?",
-        (new_username, new_password, new_role, old_username, old_password),
-    )
-    conn.commit()
+    with sqlite3.connect("db/Notes.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "UPDATE USERS SET username = ?, password = ?, role = ? WHERE username = ? AND password = ?",
+            (new_username, new_password, new_role, old_username, old_password),
+        )
+        conn.commit()
 
 
 def check_promise(username, *args):  # checking promise
@@ -178,3 +171,132 @@ def login():  # for logging in to an account (return username , password , role 
             continue
         role = get_role_with_username(username=username)
         return username, password, role
+
+
+def get_notes():  # get subject and notes and tags(json.dumps(tags))
+
+    while True:
+        subject = input(Fore.YELLOW + "Enter the subject: ")
+        if len(subject) < 5 or len(subject) > 50:
+            print(Fore.RED + "The subject must be between 5 and 50 characters...")
+            input()
+            continue
+        else:
+            break
+    while True:
+        note = input(Fore.YELLOW + "Enter the note: ")
+        if len(note) < 20 or len(note) > 5000:
+            print(Fore.RED + "The note must be between 20 and 5000 characters...")
+            input()
+            continue
+        else:
+            break
+    while True:
+        big_tag = input(Fore.YELLOW + "Enter tags (use , to separate each element): ")
+        if len(big_tag) < 10:
+            print(Fore.RED + "The tag must be over 10 characters")
+            input()
+            continue
+        else:
+            temp_tags = list(big_tag.split(","))
+            tags = json.dumps(list(map(lambda item: item.strip(), temp_tags)))
+            break
+    return subject, note, tags
+
+
+def check_user_have_note(username):  # checks if the user has any notes
+
+    with sqlite3.connect("db/Notes.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("select * from NOTES WHERE username = ?", (username,))
+        result = cursor.fetchall()
+        if result:
+            return True
+        else:
+            return False
+
+
+def check_id_in_notes(user_id):  # Checks if the ID exists in the notes.
+    with sqlite3.connect("db/Notes.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("select * from NOTES WHERE id = ?", (user_id,))
+        result = cursor.fetchall()
+        if result:
+            return True
+        else:
+            return False
+
+
+def print_user_notes(username):  # Print notes Wrriten by user
+    with sqlite3.connect("db/Notes.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "select * FROM NOTES WHERE username = ? ORDER BY username",
+            (username,),
+        )
+        result = cursor.fetchall()
+        for note in result:
+            print(
+                Fore.BLUE
+                + "note id: "
+                + Fore.GREEN
+                + str(note[0])
+                + "         "
+                + Fore.BLUE
+                + "username: "
+                + Fore.GREEN
+                + note[1]
+                + Fore.BLUE
+                + "         "
+                + "subject: "
+                + Fore.GREEN
+                + note[2]
+            )
+            for i in range(0, len(note[3]), 80):
+                print(Fore.WHITE + note[3][i : i + 80])
+            print(
+                "================================================================================\n"
+            )
+
+
+def print_all_notes():  # All users Notes
+    with sqlite3.connect("db/Notes.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("select * FROM NOTES ORDER BY username ")
+        result = cursor.fetchall()
+        for note in result:
+            print(
+                Fore.BLUE
+                + "note id: "
+                + Fore.GREEN
+                + str(note[0])
+                + "         "
+                + Fore.BLUE
+                + "username: "
+                + Fore.GREEN
+                + note[1]
+                + Fore.BLUE
+                + "         "
+                + "subject: "
+                + Fore.GREEN
+                + note[2]
+            )
+            for i in range(0, len(note[3]), 80):
+                print(Fore.WHITE + note[3][i : i + 80])
+            print(Fore.GREEN + "tags: ", end="")
+            for tag in json.loads(note[4]):
+                print(tag, end="  ")
+            print(
+                "================================================================================\n"
+            )
+
+
+def check_note_ownership(note_id, username):  # Checks if the note belongs to the user
+    with sqlite3.connect("db/Notes.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT username FROM NOTES WHERE id = ?", (note_id,))
+        result = cursor.fetchone()
+        if result and result[0] == username:
+            return True
+        else:
+            return False
