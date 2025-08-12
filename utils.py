@@ -324,3 +324,50 @@ def return_notes_custom(  # return all notes(if user_input=1) else return notes 
                 else:
                     print(Fore.RED + "invalid id ...")
                     input()
+
+
+def edit_words_dictionary(
+    all_words_dictionary, specific_note_dicionary
+):  # edit dictionary(if key exist update else append)
+
+    for key, value in specific_note_dicionary.items():
+        if key.lower() in all_words_dictionary.keys():
+            all_words_dictionary[key.lower()] += value
+        else:
+            all_words_dictionary[key.lower()] = value
+    return all_words_dictionary
+
+
+def print_dictionary(my_dict):  # print all dictionary data
+    for key, value in my_dict.items():
+        print(Fore.GREEN + f"{key}  :   {value}")
+
+
+# def two_member_tuple_to_dictionary(
+#     list_of_tuples,
+# ):  # return dictionary from list of dual member tuples
+#     returned_dict = {}
+#     for member in list_of_tuples:
+#         returned_dict[member[0]] = member[1]
+#     return returned_dict
+def print_two_member_tuple_to_dictionary(
+    list_of_tuples, *args
+):  # print dictionary from list of dual member tuples (in range args if not args print all)
+    if not list_of_tuples:
+        print(Fore.RED + "No items to display")
+        return
+    if not args:
+        for member in list_of_tuples:
+            print(Fore.GREEN + f"{member[0]} : " + Fore.BLUE + f"{member[1]}")
+    else:
+        num_items = int(args[0]) if args and args[0] and str(args[0]).isdigit() else 0
+        if num_items <= 0:
+            print(Fore.RED + "Invalid number of items to display")
+            return
+        for i in range(min(num_items, len(list_of_tuples))):
+            print(
+                Fore.GREEN
+                + f"{list_of_tuples[i][0]} : "
+                + Fore.BLUE
+                + f"{list_of_tuples[i][1]}"
+            )

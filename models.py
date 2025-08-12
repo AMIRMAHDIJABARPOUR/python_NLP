@@ -1,5 +1,6 @@
 from colorama import init, Fore, Style
 import utils, spacy, sqlite3
+from collections import Counter
 
 init(autoreset=True)
 ################################################section one#########################################################
@@ -195,3 +196,56 @@ def delete_note(id_choice):  # delete note by getting note id
         conn.commit()
     print(Fore.GREEN + "Note successfully Delete it.")
     input()
+
+
+def top_frequent_words():
+    all_words_dictionary = dict()
+    nlp = spacy.load("en_core_web_sm")
+    print(Fore.BLUE + "[1] for all notes\n[2] for a spacific note ")
+    text_analysis_choice = int(input(Fore.YELLOW + "Please select an option: "))
+    all_notes_text = ""
+    if text_analysis_choice == 1:  # to see all notes analys
+        text = ""
+        all_text_notes = utils.return_notes_custom(1)
+        for note in all_text_notes:
+            text += note[0]
+        doc = nlp(text)
+        text_words_list = [token.text for token in doc if not token.is_punct]
+        text_words_dictianary = Counter(text_words_list)
+        print(Fore.BLUE + "here the top three words in all notes")
+        most_common_tuple_list = text_words_dictianary.most_common()
+        utils.print_two_member_tuple_to_dictionary(most_common_tuple_list, 3)
+        print(Fore.BLUE + "[1] To see count of all words (press enter to go back)  ")
+        discuss = input()
+        if int(discuss) == 1:
+            utils.print_two_member_tuple_to_dictionary(most_common_tuple_list)
+    elif text_analysis_choice == 2:  # to see spacific note
+        print(
+            Fore.LIGHTYELLOW_EX
+            + "Here are the notes. You should enter the note ID to edit it. 👇👇👇\n"
+        )
+        utils.print_all_notes()
+        note_id = input(Fore.BLUE + "Enter note id : ")
+        note = utils.return_notes_custom(2, int(note_id))
+        nlp = spacy.load("en_core_web_sm")
+        note_text = note[0][0]
+        doc = nlp(note_text)
+        custom_words_list = [token.text for token in doc if not token.is_punct]
+        custom_words_dictionary = Counter(custom_words_list)
+        print(Fore.BLUE + "here the top three words in this note")
+        custom_words_tuple = custom_words_dictionary.most_common()
+        utils.print_two_member_tuple_to_dictionary(custom_words_tuple, 3)
+        print(
+            Fore.BLUE
+            + "[1] To see count of all words in this dictionary (press enter to go back)  "
+        )
+        discuss = input()
+        if int(discuss) == 1:
+            utils.print_two_member_tuple_to_dictionary(custom_words_tuple)
+
+    else:
+        print(Fore.RED + "invalid choice...")
+        input()
+
+
+print(top_frequent_words())

@@ -1,7 +1,7 @@
 from collections import Counter
 from colorama import init, Fore, Style
 import models, utils, pyfiglet, sqlite3, time, spacy
-
+from collections import Counter
 
 Welcome = "welcome to the Application"
 init(autoreset=True)
@@ -260,7 +260,8 @@ while True:
                             sent.text for sent in doc.sents
                         ]
                         print(
-                            f"there are {len(user_choice_note_sentences_list)} sentence on this note\n"
+                            Fore.BLUE
+                            + f"there are {len(user_choice_note_sentences_list)} sentence on this note\n"
                         )
                         print(
                             Fore.BLUE
@@ -281,7 +282,10 @@ while True:
                         continue
                 elif user_choice == 2:  # Count Words
                     nlp = spacy.load("en_core_web_sm")
-                    print("[1] Count all words\n[2] Counting words in a specific note ")
+                    print(
+                        Fore.BLUE
+                        + "[1] Count all words\n[2] Counting words in a specific note "
+                    )
                     text_analysis_choice = int(
                         input(Fore.YELLOW + "Please select an option: ")
                     )
