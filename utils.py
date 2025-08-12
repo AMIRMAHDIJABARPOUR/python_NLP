@@ -305,9 +305,9 @@ def check_note_ownership(note_id, username):  # Checks if the note belongs to th
             return False
 
 
-def return_notes_custom(
+def return_notes_custom(  # return all notes(if user_input=1) else return notes with id
     user_input: int, *args
-):  # return all notes(if user_input=1) else return notes with id
+):
 
     with sqlite3.connect("db/Notes.db") as conn:
         cursor = conn.cursor()

@@ -273,14 +273,80 @@ while True:
                                     print(sentence, end=" , ")
                                 else:
                                     print(sentence)
+                            print("\n")
                             input()
-                            # @#$%^&*()_)(*&^%$#@#$%^&*())(*&^%$#@#$%^&*(*&^%$#$%^&*((*&^%$))))
                     else:
                         print(Fore.RED + "invalid choice...")
                         input()
                         continue
                 elif user_choice == 2:  # Count Words
-                    pass
+                    nlp = spacy.load("en_core_web_sm")
+                    print("[1] Count all words\n[2] Counting words in a specific note ")
+                    text_analysis_choice = int(
+                        input(Fore.YELLOW + "Please select an option: ")
+                    )
+                    all_notes_text = ""
+                    if text_analysis_choice == 1:  # to see all notes analys
+                        text = ""
+                        all_text_notes = utils.return_notes_custom(1)
+                        for note in all_text_notes:
+                            text += note[0]
+                        doc = nlp(text)
+                        text_words_list = [
+                            token.text for token in doc if not token.is_punct
+                        ]
+                        print(
+                            Fore.BLUE
+                            + f"\nthere are {len(text_words_list)} words on notes was write in notebook app...\n"
+                        )
+                        print(
+                            Fore.BLUE
+                            + "[1] To see all sentences (press enter to go back)  "
+                        )
+                        discuss = input()
+                        if int(discuss) == 1:
+                            for sentence in text_words_list:
+                                if sentence != text_words_list[-1]:
+                                    print(sentence, end=" , ")
+                                else:
+                                    print(sentence)
+                            print("\n")
+                            input()
+                    elif text_analysis_choice == 2:  # to see spacific note
+                        print(
+                            Fore.LIGHTYELLOW_EX
+                            + "Here are the notes. You should enter the note ID to edit it. 👇👇👇\n"
+                        )
+                        utils.print_all_notes()
+                        note_id = input(Fore.BLUE + "Enter note id : ")
+                        note = utils.return_notes_custom(2, int(note_id))
+                        nlp = spacy.load("en_core_web_sm")
+                        note_text = note[0][0]
+                        doc = nlp(note_text)
+                        custom_words_list = [
+                            token.text for token in doc if not token.is_punct
+                        ]
+                        print(
+                            Fore.BLUE
+                            + f"\nthere are {len(custom_words_list)} words on notes was write in notebook app...\n"
+                        )
+                        print(
+                            Fore.BLUE
+                            + "[1] To see all sentences (press enter to go back)  "
+                        )
+                        discuss = input()
+                        if int(discuss) == 1:
+                            for word in custom_words_list:
+                                if word != custom_words_list[-1]:
+                                    print(word, end=" , ")
+                                else:
+                                    print(word)
+                            print("\n")
+                            input()
+                    else:
+                        print(Fore.RED + "invalid choice...")
+                        input()
+                        continue
                 elif user_choice == 3:  # Top Frequent Words
                     pass
                 elif user_choice == 4:  # Custom Tokenizer
