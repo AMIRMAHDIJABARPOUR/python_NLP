@@ -1,4 +1,4 @@
-import sqlite3, hashlib, json
+import sqlite3, hashlib, json, spacy
 from colorama import init, Fore
 
 init(autoreset=True)
@@ -254,8 +254,11 @@ def print_user_notes(username):  # Print notes Wrriten by user
             )
             for i in range(0, len(note[3]), 80):
                 print(Fore.WHITE + note[3][i : i + 80])
+            print(Fore.GREEN + "tags: ", end="")
+            for tag in json.loads(note[4]):
+                print(tag, end="  ")
             print(
-                "================================================================================\n"
+                "\n================================================================================\n"
             )
 
 
@@ -287,7 +290,7 @@ def print_all_notes():  # All users Notes
             for tag in json.loads(note[4]):
                 print(tag, end="  ")
             print(
-                "================================================================================\n"
+                "\n================================================================================\n"
             )
 
 
@@ -300,3 +303,24 @@ def check_note_ownership(note_id, username):  # Checks if the note belongs to th
             return True
         else:
             return False
+
+
+def return_notes_custom(
+    user_input: int, *args
+):  # return all notes(if user_input=1) else return notes with id
+
+    with sqlite3.connect("db/Notes.db") as conn:
+        cursor = conn.cursor()
+        if user_input == 1:
+            cursor.execute("select note FROM NOTES ORDER BY username ")
+            result = cursor.fetchall()
+            return result
+        elif user_input == 2:
+            if args:
+                if check_id_in_notes(args[0]):
+                    cursor.execute("select note FROM NOTES WHERE id = ? ", (args[0],))
+                    result = cursor.fetchall()
+                    return result
+                else:
+                    print(Fore.RED + "invalid id ...")
+                    input()

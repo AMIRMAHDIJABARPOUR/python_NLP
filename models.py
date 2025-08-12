@@ -1,5 +1,5 @@
 from colorama import init, Fore, Style
-import utils, sqlite3
+import utils, spacy
 
 init(autoreset=True)
 ################################################section one#########################################################

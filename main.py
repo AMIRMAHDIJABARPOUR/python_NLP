@@ -1,6 +1,6 @@
 from collections import Counter
 from colorama import init, Fore, Style
-import models, utils, pyfiglet, sqlite3
+import models, utils, pyfiglet, sqlite3, time, spacy
 
 
 Welcome = "welcome to the Application"
@@ -11,10 +11,10 @@ while True:
     print(Fore.YELLOW + pyfiglet.figlet_format(Welcome))
     print(
         Fore.GREEN
-        + "[1] User Management\n[2] Notes Management\n[3] Text Analysis\n[4] Search Engine\n[5] Backup & Archive\n[6] Reports\n[7] Custom Tools\n[0] Exit"
+        + "[1] User Management\n[2] Notes Management\n[3] Text Analysis(only admin)\n[4] Search Engine\n[5] Backup & Archive\n[6] Reports\n[7] Custom Tools\n[0] Exit"
     )
     choice = int(input(Fore.YELLOW + "Please select an option: " + Style.RESET_ALL))
-    # ==============User Management===============
+    # ====================================================== User Management ======================================================
     if choice == 1:  # User Management condition
         print(Fore.BLUE + pyfiglet.figlet_format("User Management"))
         print(
@@ -77,7 +77,7 @@ while True:
             continue
         else:
             utils.InvalidChoice()
-    # ==============Notes Management===============
+    # ====================================================== Notes Management ======================================================
 
     elif choice == 2:  # Notes Management condition
         print(Fore.BLUE + pyfiglet.figlet_format("Notes Management"))
@@ -198,9 +198,105 @@ while True:
         else:
             print(Fore.RED + "invalid choice...")
             input()
-
-    elif choice == 3:
-        pass
+    # =================================================== Text Analysis (NLP Base) ==================================================
+    elif choice == 3:  # Text Analisis (NLP Base ) only admin have access
+        username, password, role = utils.login()
+        if role == "admin":
+            while True:
+                print(Fore.BLUE + pyfiglet.figlet_format("Text Analysis"))
+                print(
+                    Fore.BLUE
+                    + "************************************************************"
+                )
+                print(
+                    Fore.GREEN
+                    + "[1] Count Sentences \n[2] Count Words\n[3] Top Frequent Words\n[4] Custom Tokenizer\n[5] Back\n"
+                )
+                user_choice = int(input(Fore.YELLOW + "Please select an option: "))
+                if user_choice == 1:  # Count Sentences
+                    nlp = spacy.load("en_core_web_sm")
+                    print(
+                        "[1] Count all sentences\n[2] Counting sentences in a specific note "
+                    )
+                    text_analysis_choice = int(
+                        input(Fore.YELLOW + "Please select an option: ")
+                    )
+                    all_notes_text = ""
+                    if text_analysis_choice == 1:
+                        for note in utils.return_notes_custom(1):
+                            all_notes_text = all_notes_text + note[0]
+                        doc = nlp(all_notes_text)
+                        all_notes_list = [sent.text for sent in doc.sents]
+                        print(
+                            f"there are {len(all_notes_list)} sentence on notes was write in notebook app...\n"
+                        )
+                        print(
+                            Fore.BLUE
+                            + "[1] To see all sentences (press enter to go back)  "
+                        )
+                        discuss = input()
+                        if int(discuss) == 1:
+                            for sentence in all_notes_list:
+                                if sentence != all_notes_list[-1]:
+                                    print(sentence, end=" , ")
+                                else:
+                                    print(sentence)
+                            input()
+                    elif text_analysis_choice == 2:
+                        print(
+                            Fore.LIGHTYELLOW_EX
+                            + "Here are the notes. You should enter the note ID to edit it. 👇👇👇\n"
+                        )
+                        utils.print_all_notes()
+                        user_choice_note_id = int(
+                            input(Fore.YELLOW + "Please select an option: ")
+                        )
+                        user_choice_note = (
+                            utils.return_notes_custom(2, user_choice_note_id)
+                        )[0][0]
+                        nlp = spacy.load("en_core_web_sm")
+                        doc = nlp(user_choice_note)
+                        user_choice_note_sentences_list = [
+                            sent.text for sent in doc.sents
+                        ]
+                        print(
+                            f"there are {len(user_choice_note_sentences_list)} sentence on this note\n"
+                        )
+                        print(
+                            Fore.BLUE
+                            + "[1] To see all sentences (press enter to go back)  "
+                        )
+                        discuss = input()
+                        if int(discuss) == 1:
+                            for sentence in user_choice_note_sentences_list:
+                                if sentence != user_choice_note_sentences_list[-1]:
+                                    print(sentence, end=" , ")
+                                else:
+                                    print(sentence)
+                            input()
+                            # @#$%^&*()_)(*&^%$#@#$%^&*())(*&^%$#@#$%^&*(*&^%$#$%^&*((*&^%$))))
+                    else:
+                        print(Fore.RED + "invalid choice...")
+                        input()
+                        continue
+                elif user_choice == 2:  # Count Words
+                    pass
+                elif user_choice == 3:  # Top Frequent Words
+                    pass
+                elif user_choice == 4:  # Custom Tokenizer
+                    pass
+                elif user_choice == 5:  # Back
+                    print(Fore.GREEN + "Back...")
+                    time.sleep(3)
+                    break
+                else:
+                    print(Fore.RED + "invalid choice...")
+                    time.sleep(3)
+                    continue
+        else:
+            print(Fore.RED + "Warning : you must be an admin to access this section")
+            input()
+            continue
     elif choice == 4:
         pass
     elif choice == 5:
