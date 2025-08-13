@@ -13,7 +13,10 @@ while True:
         Fore.GREEN
         + "[1] User Management\n[2] Notes Management\n[3] Text Analysis(only admin)\n[4] Search Engine\n[5] Backup & Archive\n[6] Reports\n[7] Custom Tools\n[0] Exit"
     )
-    choice = int(input(Fore.YELLOW + "Please select an option: " + Style.RESET_ALL))
+    try:
+        choice = int(input(Fore.YELLOW + "Please select an option: " + Style.RESET_ALL))
+    except:
+        print(Fore.RED + "invalid choice")
     # ====================================================== User Management ======================================================
     if choice == 1:  # User Management condition
         print(Fore.BLUE + pyfiglet.figlet_format("User Management"))
@@ -352,9 +355,46 @@ while True:
                         input()
                         continue
                 elif user_choice == 3:  # Top Frequent Words
-                    pass
+                    models.top_frequent_words()
                 elif user_choice == 4:  # Custom Tokenizer
-                    pass
+                    my_token = input(Fore.YELLOW + "Enter your Tokenizer: ")
+                    if not my_token.strip():
+                        print(Fore.RED + "Tokenizer cannot be empty...")
+                        input()
+                        continue
+                    print(
+                        Fore.BLUE
+                        + "\n[1] to check your token in all notes\n[2] to check note with id "
+                    )
+                    try:
+                        tokenize_choice = int(
+                            input(Fore.YELLOW + "Please select an option: ")
+                        )
+                    except ValueError:
+                        print(Fore.RED + "Please select a valid option (1 or 2)...")
+                        input()
+                        continue
+                    if tokenize_choice == 1:
+                        models.custom_tokenizer(my_token)
+                    elif tokenize_choice == 2:
+                        utils.print_all_notes()
+                        try:
+                            tokenize_choice_id = int(
+                                input(Fore.BLUE + "Please enter note id: ")
+                            )
+                            if not utils.check_id_in_notes(tokenize_choice_id):
+                                print(Fore.RED + "Note not found...")
+                                input()
+                                continue
+                            models.custom_tokenizer(my_token, tokenize_choice_id)
+                        except ValueError:
+                            print(Fore.RED + "Invalid note ID...")
+                            input()
+                            continue
+                    else:
+                        print(Fore.RED + "Please select a valid option (1 or 2)...")
+                        input()
+                        continue
                 elif user_choice == 5:  # Back
                     print(Fore.GREEN + "Back...")
                     time.sleep(3)

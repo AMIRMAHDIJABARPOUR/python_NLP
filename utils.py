@@ -1,6 +1,13 @@
 import sqlite3, hashlib, json, spacy
 from colorama import init, Fore
 
+# def two_member_tuple_to_dictionary(
+#     list_of_tuples,
+# ):  # return dictionary from list of dual member tuples
+#     returned_dict = {}
+#     for member in list_of_tuples:
+#         returned_dict[member[0]] = member[1]
+#     return returned_dict
 init(autoreset=True)
 
 
@@ -326,6 +333,39 @@ def return_notes_custom(  # return all notes(if user_input=1) else return notes 
                     input()
 
 
+def return_all_notes_elemans_custom(
+    user_input: int, *args
+):  # return all notes(if user_input=1) else return notes with id
+    with sqlite3.connect("db/Notes.db") as conn:
+        cursor = conn.cursor()
+        if user_input == 1:
+            cursor.execute(
+                "SELECT id, username, subject, note, Tags FROM NOTES ORDER BY username"
+            )
+            result = cursor.fetchall()
+            return result
+        elif user_input == 2:
+            if args:
+                try:
+                    note_id = int(args[0])
+                    if check_id_in_notes(note_id):
+                        cursor.execute(
+                            "SELECT id, username, subject, note, Tags FROM NOTES WHERE id = ?",
+                            (note_id,),
+                        )
+                        result = cursor.fetchall()
+                        return result[0] if result else []
+                    else:
+                        print(Fore.RED + "Invalid id...")
+                        input()
+                        return []
+                except (ValueError, IndexError):
+                    print(Fore.RED + "Invalid id...")
+                    input()
+                    return []
+            return []
+
+
 def edit_words_dictionary(
     all_words_dictionary, specific_note_dicionary
 ):  # edit dictionary(if key exist update else append)
@@ -343,16 +383,10 @@ def print_dictionary(my_dict):  # print all dictionary data
         print(Fore.GREEN + f"{key}  :   {value}")
 
 
-# def two_member_tuple_to_dictionary(
-#     list_of_tuples,
-# ):  # return dictionary from list of dual member tuples
-#     returned_dict = {}
-#     for member in list_of_tuples:
-#         returned_dict[member[0]] = member[1]
-#     return returned_dict
 def print_two_member_tuple_to_dictionary(
     list_of_tuples, *args
 ):  # print dictionary from list of dual member tuples (in range args if not args print all)
+
     if not list_of_tuples:
         print(Fore.RED + "No items to display")
         return

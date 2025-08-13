@@ -1,5 +1,5 @@
+import utils, spacy, sqlite3, re, json
 from colorama import init, Fore, Style
-import utils, spacy, sqlite3
 from collections import Counter
 
 init(autoreset=True)
@@ -248,4 +248,95 @@ def top_frequent_words():
         input()
 
 
-print(top_frequent_words())
+def custom_tokenizer(my_token: str, *args):
+    my_token = rf"{my_token}"
+    note_ids = []
+    with sqlite3.connect("db/Notes.db") as conn:
+        cursor = conn.cursor()
+        if not args:
+            cursor.execute("SELECT id, subject, note FROM NOTES")
+            database_notes_tuples = cursor.fetchall()
+            for note in database_notes_tuples:
+                if re.findall(my_token, note[1], re.IGNORECASE) or re.findall(
+                    my_token, note[2], re.IGNORECASE
+                ):
+                    note_ids.append(note[0])
+            if not note_ids:
+                print(Fore.RED + f"No notes found containing the token '{my_token}'...")
+                input()
+                return
+            for note_id in note_ids:
+                note = utils.return_all_notes_elemans_custom(2, note_id)
+                print(
+                    Fore.BLUE
+                    + "note id: "
+                    + Fore.GREEN
+                    + str(note[0])
+                    + "         "
+                    + Fore.BLUE
+                    + "username: "
+                    + Fore.GREEN
+                    + note[1]
+                    + Fore.BLUE
+                    + "         "
+                    + "subject: "
+                    + Fore.GREEN
+                    + note[2]
+                )
+                for i in range(0, len(note[3]), 80):
+                    print(Fore.WHITE + note[3][i : i + 80])
+                print(Fore.GREEN + "tags: ", end="")
+                for tag in json.loads(note[4]):
+                    print(tag, end="  ")
+                print(
+                    "\n================================================================================\n"
+                )
+        else:
+            try:
+                user_note_id_choice = int(args[0])
+            except (ValueError, IndexError):
+                print(Fore.RED + "Please enter a valid number for note ID...")
+                input()
+                return
+            if not utils.check_id_in_notes(user_note_id_choice):
+                print(Fore.RED + f"Note with ID {user_note_id_choice} not found...")
+                input()
+                return
+            note = utils.return_all_notes_elemans_custom(2, user_note_id_choice)
+            if re.findall(my_token, note[2], re.IGNORECASE) or re.findall(
+                my_token, note[3], re.IGNORECASE
+            ):
+                print(
+                    Fore.GREEN
+                    + f"Your custom token '{my_token}' exists in note ID {user_note_id_choice}..."
+                )
+                print(
+                    Fore.BLUE
+                    + "note id: "
+                    + Fore.GREEN
+                    + str(note[0])
+                    + "         "
+                    + Fore.BLUE
+                    + "username: "
+                    + Fore.GREEN
+                    + note[1]
+                    + Fore.BLUE
+                    + "         "
+                    + "subject: "
+                    + Fore.GREEN
+                    + note[2]
+                )
+                for i in range(0, len(note[3]), 80):
+                    print(Fore.WHITE + note[3][i : i + 80])
+                print(Fore.GREEN + "tags: ", end="")
+                for tag in json.loads(note[4]):
+                    print(tag, end="  ")
+                print(
+                    "\n================================================================================\n"
+                )
+            else:
+                print(
+                    Fore.RED
+                    + f"No token '{my_token}' found in note ID {user_note_id_choice}..."
+                )
+                input()
