@@ -1,17 +1,20 @@
-import utils, spacy, sqlite3, re, json
+import utils, spacy, sqlite3, re, json, sys, pickle
 from colorama import init, Fore, Style
-from collections import Counter
+from collections import Counter, defaultdict
+
 
 init(autoreset=True)
 ################################################section one#########################################################
 
 
 def add_user():  # add user function
+
     username = utils.set_username(massage="Enter username: ", edit=False)  # setusername
     password = utils.set_passwoed("enter your password:")
     role = utils.set_role("please Enter The role:")
     utils.insert_add_user(username, password, role)
     print(Fore.GREEN + "User Added successfully.press Enter to continue")
+    utils.build_log(username=f"User Added ", message=f"{username} Added successfully")
     input()
 
 
@@ -69,6 +72,7 @@ def edit_user(admin_username, admin_password_hash):  # edit user funcrion
                         + "Enter new username (Enter to keep current): "
                         + Style.RESET_ALL
                     )
+
                     if not username_input:
                         break
                     if len(username_input) < 3:
@@ -89,6 +93,9 @@ def edit_user(admin_username, admin_password_hash):  # edit user funcrion
                         input()
                         continue
                     new_username = username_input
+                    utils.build_database(
+                        username=admin_username, message="Username Successfuly eddited"
+                    )
                     break
             elif choice == 2:
                 while True:
@@ -107,6 +114,9 @@ def edit_user(admin_username, admin_password_hash):  # edit user funcrion
                         input()
                         continue
                     new_password = utils.password_to_hash(password_input)
+                    utils.build_database(
+                        username=admin_username, message="Password successfuly edited "
+                    )
                     break
             elif choice == 3:
                 acceptable_roles = ["admin", "editor", "viewer"]
@@ -126,6 +136,9 @@ def edit_user(admin_username, admin_password_hash):  # edit user funcrion
                         input()
                         continue
                     new_role = role_input.lower()
+                    utils.build_database(
+                        username=admin_username, message="Role successfuly edited "
+                    )
                     break
             elif choice == 4:
                 break
@@ -155,7 +168,7 @@ def edit_user(admin_username, admin_password_hash):  # edit user funcrion
         break
 
 
-def delete_user(username):  # delete user funcrion
+def delete_user(username, *args):  # delete user funcrion
 
     if utils.search_user(username):
         with sqlite3.connect("db/Notes.db") as conn:
@@ -163,6 +176,24 @@ def delete_user(username):  # delete user funcrion
             cursor.execute("DELETE FROM USERS WHERE Username = ?", (username,))
             conn.commit()
             conn.close()
+        utils.build_database(
+            username=args[0], message=f"{username} successfuly deleted"
+        )
+
+
+def list_of_all_users():
+    conn = sqlite3.connect("db/Notes.db")
+    cursor = conn.cursor()
+    users = cursor.execute("SELECT username , role FROM USERS")
+    for user in users:
+        print(
+            Fore.BLUE
+            + f"username: {Fore.WHITE+user[0]} {Fore.LIGHTBLUE_EX}role : "
+            + Fore.WHITE
+            + user[1]
+        )
+    print(Fore.LIGHTGREEN_EX + "press enter to continue...")
+    input()
 
 
 ####################################################section two#########################################################
@@ -198,11 +229,26 @@ def delete_note(id_choice):  # delete note by getting note id
     input()
 
 
-def top_frequent_words():
+####################################################section three#########################################################
+
+
+def top_frequent_words():  # print frequent word
     all_words_dictionary = dict()
     nlp = spacy.load("en_core_web_sm")
     print(Fore.BLUE + "[1] for all notes\n[2] for a spacific note ")
-    text_analysis_choice = int(input(Fore.YELLOW + "Please select an option: "))
+    while True:
+        try:
+            text_analysis_choice = int(input(Fore.YELLOW + "Please select an option: "))
+            if text_analysis_choice in [1, 2]:
+                break
+            else:
+                print(Fore.RED + "invalid choice")
+                input()
+                continue
+        except ValueError:
+            print(Fore.RED + "invalid choice")
+            input()
+            continue
     all_notes_text = ""
     if text_analysis_choice == 1:  # to see all notes analys
         text = ""
@@ -217,15 +263,24 @@ def top_frequent_words():
         utils.print_two_member_tuple_to_dictionary(most_common_tuple_list, 3)
         print(Fore.BLUE + "[1] To see count of all words (press enter to go back)  ")
         discuss = input()
-        if int(discuss) == 1:
+
+        if discuss == "1":
             utils.print_two_member_tuple_to_dictionary(most_common_tuple_list)
+            input()
     elif text_analysis_choice == 2:  # to see spacific note
         print(
             Fore.LIGHTYELLOW_EX
             + "Here are the notes. You should enter the note ID to edit it. 👇👇👇\n"
         )
         utils.print_all_notes()
-        note_id = input(Fore.BLUE + "Enter note id : ")
+        while True:
+            try:
+                note_id = int(input(Fore.BLUE + "Enter note id : "))
+                break
+            except:
+                print(Fore.RED + "invalid id ....")
+                input()
+                continue
         note = utils.return_notes_custom(2, int(note_id))
         nlp = spacy.load("en_core_web_sm")
         note_text = note[0][0]
@@ -240,16 +295,17 @@ def top_frequent_words():
             + "[1] To see count of all words in this dictionary (press enter to go back)  "
         )
         discuss = input()
-        if int(discuss) == 1:
+        if discuss == "1":
             utils.print_two_member_tuple_to_dictionary(custom_words_tuple)
+            input()
 
     else:
         print(Fore.RED + "invalid choice...")
         input()
 
 
-def custom_tokenizer(my_token: str, *args):
-    my_token = rf"{my_token}"
+def custom_tokenizer(my_token: str, *args):  # Escape special regex characters
+    my_token = re.escape(my_token)  # Escape special regex characters
     note_ids = []
     with sqlite3.connect("db/Notes.db") as conn:
         cursor = conn.cursor()
@@ -257,86 +313,168 @@ def custom_tokenizer(my_token: str, *args):
             cursor.execute("SELECT id, subject, note FROM NOTES")
             database_notes_tuples = cursor.fetchall()
             for note in database_notes_tuples:
-                if re.findall(my_token, note[1], re.IGNORECASE) or re.findall(
-                    my_token, note[2], re.IGNORECASE
-                ):
-                    note_ids.append(note[0])
+                try:
+                    if (note[1] and re.findall(my_token, note[1], re.IGNORECASE)) or (
+                        note[2] and re.findall(my_token, note[2], re.IGNORECASE)
+                    ):
+                        note_ids.append(note[0])
+                except:
+                    print(Fore.RED + "invalid token ...")
+                    input()
+                    continue
             if not note_ids:
                 print(Fore.RED + f"No notes found containing the token '{my_token}'...")
                 input()
                 return
             for note_id in note_ids:
                 note = utils.return_all_notes_elemans_custom(2, note_id)
-                print(
-                    Fore.BLUE
-                    + "note id: "
-                    + Fore.GREEN
-                    + str(note[0])
-                    + "         "
-                    + Fore.BLUE
-                    + "username: "
-                    + Fore.GREEN
-                    + note[1]
-                    + Fore.BLUE
-                    + "         "
-                    + "subject: "
-                    + Fore.GREEN
-                    + note[2]
-                )
-                for i in range(0, len(note[3]), 80):
-                    print(Fore.WHITE + note[3][i : i + 80])
-                print(Fore.GREEN + "tags: ", end="")
-                for tag in json.loads(note[4]):
-                    print(tag, end="  ")
-                print(
-                    "\n================================================================================\n"
-                )
+                if not note:
+                    print(Fore.RED + f"Note with ID {note_id} not found...")
+                    input()
+                    continue
+                try:
+                    print(
+                        Fore.BLUE
+                        + "note id: "
+                        + Fore.GREEN
+                        + str(note[0])
+                        + "         "
+                        + Fore.BLUE
+                        + "username: "
+                        + Fore.GREEN
+                        + note[1]
+                        + Fore.BLUE
+                        + "         "
+                        + "subject: "
+                        + Fore.GREEN
+                        + note[2]
+                    )
+                    for i in range(0, len(note[3]), 80):
+                        print(Fore.WHITE + note[3][i : i + 80])
+                    print(Fore.GREEN + "tags: ", end="")
+                    for tag in json.loads(note[4]):
+                        print(tag, end="  ")
+                    print(
+                        "\n================================================================================\n"
+                    )
+                except:
+                    print(Fore.RED + "invalid token ...")
+                    input()
+                    continue
         else:
             try:
                 user_note_id_choice = int(args[0])
-            except (ValueError, IndexError):
-                print(Fore.RED + "Please enter a valid number for note ID...")
+                if not utils.check_id_in_notes(user_note_id_choice):
+                    print(Fore.RED + f"Note with ID {user_note_id_choice} not found...")
+                    input()
+                    return
+                note = utils.return_all_notes_elemans_custom(2, user_note_id_choice)
+                if not note:
+                    print(Fore.RED + f"Note with ID {user_note_id_choice} not found...")
+                    input()
+                    return
+                if (note[2] and re.findall(my_token, note[2], re.IGNORECASE)) or (
+                    note[3] and re.findall(my_token, note[3], re.IGNORECASE)
+                ):
+                    print(
+                        Fore.GREEN
+                        + f"Your custom token '{my_token}' exists in note ID {user_note_id_choice}..."
+                    )
+                    print(
+                        Fore.BLUE
+                        + "note id: "
+                        + Fore.GREEN
+                        + str(note[0])
+                        + "         "
+                        + Fore.BLUE
+                        + "username: "
+                        + Fore.GREEN
+                        + note[1]
+                        + Fore.BLUE
+                        + "         "
+                        + "subject: "
+                        + Fore.GREEN
+                        + note[2]
+                    )
+                    for i in range(0, len(note[3]), 80):
+                        print(Fore.WHITE + note[3][i : i + 80])
+                    print(Fore.GREEN + "tags: ", end="")
+                    for tag in json.loads(note[4]):
+                        print(tag, end="  ")
+                    print(
+                        "\n================================================================================\n"
+                    )
+                else:
+                    print(
+                        Fore.RED
+                        + f"No token '{my_token}' found in note ID {user_note_id_choice}..."
+                    )
+                    input()
+            except:
+                print(Fore.RED + "invalid token ...")
                 input()
                 return
-            if not utils.check_id_in_notes(user_note_id_choice):
-                print(Fore.RED + f"Note with ID {user_note_id_choice} not found...")
-                input()
-                return
-            note = utils.return_all_notes_elemans_custom(2, user_note_id_choice)
-            if re.findall(my_token, note[2], re.IGNORECASE) or re.findall(
-                my_token, note[3], re.IGNORECASE
-            ):
-                print(
-                    Fore.GREEN
-                    + f"Your custom token '{my_token}' exists in note ID {user_note_id_choice}..."
-                )
-                print(
-                    Fore.BLUE
-                    + "note id: "
-                    + Fore.GREEN
-                    + str(note[0])
-                    + "         "
-                    + Fore.BLUE
-                    + "username: "
-                    + Fore.GREEN
-                    + note[1]
-                    + Fore.BLUE
-                    + "         "
-                    + "subject: "
-                    + Fore.GREEN
-                    + note[2]
-                )
-                for i in range(0, len(note[3]), 80):
-                    print(Fore.WHITE + note[3][i : i + 80])
-                print(Fore.GREEN + "tags: ", end="")
-                for tag in json.loads(note[4]):
-                    print(tag, end="  ")
-                print(
-                    "\n================================================================================\n"
-                )
-            else:
-                print(
-                    Fore.RED
-                    + f"No token '{my_token}' found in note ID {user_note_id_choice}..."
-                )
-                input()
+
+
+####################################################section four#########################################################
+
+
+def build_inverted_index():  # create inverted index in all around database
+    x = 0
+    inverted_index = defaultdict(list)
+    all_notes = utils.return_all_notes_elemans_custom(1)
+    for note in all_notes:
+        note_tokens = utils.convert_sentence_to_word(note=note[2])
+        note_tokens.extend(utils.convert_sentence_to_word(note=note[3]))
+        utils.append_dictionary_with_id(
+            main_dict=inverted_index, append_list=note_tokens, note_id=note[0]
+        )
+        x += 1
+        sys.stdout.write(
+            "\r"
+            + Fore.BLUE
+            + f"{x} notes out of {len(all_notes)} notes were processing!"
+        )
+        sys.stdout.flush()
+    sys.stdout.write("\r" + "\nfinish\n ")
+    sys.stdout.flush()
+
+    return inverted_index
+
+
+def search_keyword(user_search, inverted_index):
+    Tokens = utils.convert_sentence_to_word(user_search)
+    searched_note_ids_list = []
+    if inverted_index:
+        for word in Tokens:
+            if word in inverted_index:
+                searched_note_ids_list.extend(inverted_index[word])
+
+    return searched_note_ids_list
+
+
+def show_search_stats(search_status):
+
+    tuple_index = tuple(search_status.items())
+    print(utils.two_member_tuple_to_dictionary(tuple_index))
+    input(Fore.GREEN + "\n continue...")
+
+
+def save_index(inverted_index):
+    with open("index/inverted_index.pkl", "wb") as file:
+        pickle.dump(inverted_index, file)
+    print(Fore.GREEN + "Inverted index saved successfully.")
+    input()
+
+
+def load_index():
+    pickle_file_path = "index/inverted_index.pkl"
+    try:
+        with open(pickle_file_path, "rb") as file:
+            inverted_index = pickle.load(file)
+        print(Fore.GREEN + "Inverted index loaded successfully.")
+        return inverted_index
+    except FileNotFoundError:
+        print(Fore.RED + "Inverted index file not found. Please build the index first.")
+        input()
+        return None

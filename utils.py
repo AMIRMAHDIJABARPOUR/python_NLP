@@ -1,13 +1,20 @@
-import sqlite3, hashlib, json, spacy
+import sqlite3, hashlib, json, spacy, logging
 from colorama import init, Fore
 
-# def two_member_tuple_to_dictionary(
-#     list_of_tuples,
-# ):  # return dictionary from list of dual member tuples
-#     returned_dict = {}
-#     for member in list_of_tuples:
-#         returned_dict[member[0]] = member[1]
-#     return returned_dict
+
+def build_log(username, message):
+    logging.info(Fore.BLUE + f"{username} : " + Fore.GREEN + f"{message}")
+
+
+def two_member_tuple_to_dictionary(
+    list_of_tuples,
+):  # return dictionary from list of dual member tuples
+    returned_dict = {}
+    for member in list_of_tuples:
+        returned_dict[member[0]] = member[1]
+    return returned_dict
+
+
 init(autoreset=True)
 
 
@@ -163,6 +170,7 @@ def check_promise(username, *args):  # checking promise
         return False
 
 
+# =================================================== section two ====================================================
 def login():  # for logging in to an account (return username , password , role )
 
     while True:
@@ -267,6 +275,43 @@ def print_user_notes(username):  # Print notes Wrriten by user
             print(
                 "\n================================================================================\n"
             )
+
+
+def print_note_by_id(note_id):  # Print a single note by its ID
+    with sqlite3.connect("db/Notes.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT * FROM NOTES WHERE id = ?",
+            (note_id,),
+        )
+        note = cursor.fetchone()
+        if note:
+            print(
+                Fore.BLUE
+                + "note id: "
+                + Fore.GREEN
+                + str(note[0])
+                + "         "
+                + Fore.BLUE
+                + "username: "
+                + Fore.GREEN
+                + note[1]
+                + Fore.BLUE
+                + "         "
+                + "subject: "
+                + Fore.GREEN
+                + note[2]
+            )
+            for i in range(0, len(note[3]), 80):
+                print(Fore.WHITE + note[3][i : i + 80])
+            print(Fore.GREEN + "tags: ", end="")
+            for tag in json.loads(note[4]):
+                print(tag, end="  ")
+            print(
+                "\n================================================================================\n"
+            )
+        else:
+            print(Fore.RED + f"No note found with ID {note_id}")
 
 
 def print_all_notes():  # All users Notes
@@ -405,3 +450,36 @@ def print_two_member_tuple_to_dictionary(
                 + Fore.BLUE
                 + f"{list_of_tuples[i][1]}"
             )
+
+
+def convert_sentence_to_word(note):  # convert note to words lists
+    text = note
+    nlp = spacy.load("en_core_web_sm")
+    doc = nlp(text)
+    total = [
+        token.text.lower()
+        for token in doc
+        if not token.is_punct and token.is_alpha and len(token.text) > 1
+    ]
+    return total
+
+
+def append_dictionary_with_id(main_dict: dict, append_list: list, note_id: int):
+    for word in append_list:
+        if word in main_dict:
+            if not note_id in main_dict[word]:
+                main_dict[word].append(note_id)
+        else:
+            main_dict[word] = [note_id]
+    return main_dict
+
+
+def append_dictionary_to_dictionary(
+    main_dictionary: dict, appended_dictionary: dict
+) -> dict:
+    for key, value in appended_dictionary.items():
+        if key in main_dictionary:
+            main_dictionary[key] = list(set(main_dictionary[key] + value))
+        else:
+            main_dictionary[key] = value
+    return main_dictionary

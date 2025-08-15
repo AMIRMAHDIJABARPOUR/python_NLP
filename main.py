@@ -1,8 +1,14 @@
-from collections import Counter
+from collections import Counter, defaultdict
 from colorama import init, Fore, Style
-import models, utils, pyfiglet, sqlite3, time, spacy
-from collections import Counter
+import models, utils, pyfiglet, sqlite3, time, spacy, logging
 
+inverted_index, search_status = defaultdict(list), defaultdict(list)
+logging.basicConfig(
+    filename="logs/logs.txt",
+    level=logging.INFO,
+    format="%(asctime)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 Welcome = "welcome to the Application"
 init(autoreset=True)
 utils.build_database()
@@ -11,13 +17,15 @@ while True:
     print(Fore.YELLOW + pyfiglet.figlet_format(Welcome))
     print(
         Fore.GREEN
-        + "[1] User Management\n[2] Notes Management\n[3] Text Analysis(only admin)\n[4] Search Engine\n[5] Backup & Archive\n[6] Reports\n[7] Custom Tools\n[0] Exit"
+        + "[1] User Management\n[2] Notes Management\n[3] Text Analysis(only admin)\n[4] Search Engine\n[5] Backup & Archive (admin , editor)\n[6] Reports(only admin)\n[7] Custom Tools\n[0] Exit"
     )
     try:
         choice = int(input(Fore.YELLOW + "Please select an option: " + Style.RESET_ALL))
     except:
         print(Fore.RED + "invalid choice")
-    # ====================================================== User Management ======================================================
+        input()
+        continue
+    # ======================================================= User Management ======================================================
     if choice == 1:  # User Management condition
         print(Fore.BLUE + pyfiglet.figlet_format("User Management"))
         print(
@@ -28,16 +36,27 @@ while True:
             Fore.GREEN
             + "[1] Add New User \n[2] Edit User \n[3] Delete User \n[4] List All Users\n[5] Back \n"
         )
-        user_choice = int(
-            input(Fore.YELLOW + "Please select an option: " + Style.RESET_ALL)
-        )
+        while True:
+            try:
+                user_choice = int(
+                    input(Fore.YELLOW + "Please select an option: " + Style.RESET_ALL)
+                )
+                if user_choice in [1, 2, 3, 4, 5]:
+                    break
+                else:
+                    print(Fore.RED + "invalid option ...")
+                    input()
+                    continue
+            except ValueError:
+                print(Fore.RED + "invalid choice")
+                input()
+                continue
         if user_choice == 1:  # adding user
             models.add_user()
         elif user_choice == 2:  # edit user(only admin , editor can edit)
             username, password, role = utils.login()
             if role in ["admin", "editor"]:
                 models.edit_user(username, password)
-                break
             else:
                 print(Fore.RED + "you must be admin or editor to edit Uesr...")
                 input()
@@ -45,37 +64,37 @@ while True:
         elif user_choice == 3:  # delete user (only admin can delete user)
             my_username, password_hash, role = utils.login()
             if role == "admin":
+
                 while True:
                     deleted_username = input(
                         Fore.YELLOW + "Who do you want to delete? "
                     )
+                    if not deleted_username:
+                        print(Fore.RED + "The username can not be empty")
+                        input()
+                        continue
                     if utils.search_user(deleted_username):
-                        models.delete_user(deleted_username)
+                        models.delete_user(deleted_username, my_username)
                         print(Fore.RED + f"{deleted_username} was deleted ...")
                         input()
                         break
                     else:
-                        print(Fore.RED + "wrong username ....")
-                        input()
-                        continue
+                        print(
+                            Fore.RED
+                            + "wrong username Enter 1 to back or press Enter to continue"
+                        )
+                        x = input()
+                        if int(x) == 1:
+                            break
+                        else:
+                            continue
             else:
                 print(Fore.RED + "Do not have access (only admin can delete user) ...")
                 input()
                 continue
         elif user_choice == 4:  # users list(all roles can see this part)
-            conn = sqlite3.connect("db/Notes.db")
-            cursor = conn.cursor()
-            users = cursor.execute("SELECT username , role FROM USERS")
-            for user in users:
-                print(
-                    Fore.BLUE
-                    + f"username: {Fore.WHITE+user[0]} {Fore.LIGHTBLUE_EX}role : "
-                    + Fore.WHITE
-                    + user[1]
-                )
-            print(Fore.LIGHTGREEN_EX + "press enter to continue...")
-            input()
-            continue
+            models.list_of_all_users()
+            utils.build_log(username="user", message="View the list of useres ")
         elif user_choice == 5:
             continue
         else:
@@ -92,11 +111,24 @@ while True:
             Fore.GREEN
             + "[1] Add New Note\n[2] Edit Note \n[3] Delete Note\n[4] List All Notes\n[5] Back"
         )
-        user_choice = int(input(Fore.YELLOW + "Please select an option: "))
+        try:
+            while True:
+                user_choice = int(input(Fore.YELLOW + "Please select an option: "))
+                if user_choice in [1, 2, 3, 4, 5]:
+                    break
+                else:
+                    print(Fore.RED + "invalid choice...")
+                    input()
+                    continue
+        except ValueError:
+            print(Fore.RED + "invalid choice...")
+            input()
+            continue
         if user_choice == 1:  # add note
             username, password, role = utils.login()
             models.add_new_notes(username)
             print(Fore.GREEN + "adding note was successful ...")
+            utils.build_log(username=username, message="Successfuly Added the note ")
             input()
         elif (
             user_choice == 2
@@ -109,12 +141,20 @@ while True:
                 )
                 utils.print_all_notes()
                 while True:
-                    id_choice = int(
-                        input("Enter the ID of the note you want to edit: ")
-                    )
+                    try:
+                        id_choice = int(
+                            input("Enter the ID of the note you want to edit: ")
+                        )
+                    except ValueError:
+                        print(Fore.RED + "invalid id...")
+                        input()
+                        continue
                     if utils.check_id_in_notes(user_id=id_choice):
                         models.edit_note(id_choice)
                         print(Fore.GREEN + "\n Note was edited successfully...")
+                        utils.build_log(
+                            username=username, message="successfuly edited the  note "
+                        )
                         input()
                         break
                     else:
@@ -128,7 +168,14 @@ while True:
                 )
                 utils.print_user_notes(username=username)
                 while True:
-                    id_choice = int(input("Enter the ID of the note you want to edit."))
+                    try:
+                        id_choice = int(
+                            input("Enter the ID of the note you want to edit: ")
+                        )
+                    except ValueError:
+                        print(Fore.RED + "invalid id...")
+                        input()
+                        continue
                     if utils.check_id_in_notes(
                         user_id=id_choice
                     ) and utils.check_note_ownership(
@@ -137,6 +184,8 @@ while True:
                         models.edit_note(id_choice)
                         print(Fore.GREEN + "\n Note was edited successfully...")
                         input()
+                        utils.build_log(username=username, message=" ")
+
                         break
                     else:
                         print(Fore.RED + "invalid id")
@@ -154,11 +203,22 @@ while True:
                 )
                 utils.print_all_notes()
                 while True:
-                    id_choice = int(
-                        input("Enter the ID of the note you want to Delete: ")
-                    )
+                    try:
+                        id_choice = int(
+                            input("Enter the ID of the note you want to Delete: ")
+                        )
+                    except ValueError:
+                        print(Fore.RED + "invalid id ...")
+                        input()
+                        continue
+
                     if utils.check_id_in_notes(user_id=id_choice):
                         models.delete_note(id_choice)
+                        utils.build_log(
+                            username=username, message="successfuly deleted the  note "
+                        )
+                        print(Fore.RED + "successfuly deleted the  note ")
+                        input()
                         break
                     else:
                         print(Fore.RED + "invalid id...")
@@ -171,15 +231,26 @@ while True:
                 )
                 utils.print_user_notes(username=username)
                 while True:
-                    id_choice = int(
-                        input("Enter the ID of the note you want to Delete: ")
-                    )
+                    try:
+                        id_choice = int(
+                            input("Enter the ID of the note you want to Delete: ")
+                        )
+                    except ValueError:
+                        print(Fore.RED + "invalid id ...")
+                        input()
+                        continue
+
                     if utils.check_id_in_notes(
                         user_id=id_choice
                     ) and utils.check_note_ownership(
                         note_id=id_choice, username=username
                     ):
                         models.delete_note(id_choice)
+                        print(Fore.RED + "successfuly edited the  note")
+                        input()
+                        utils.build_log(
+                            username=username, message="successfuly edited the  note "
+                        )
                         break
                     else:
                         print(Fore.RED + "invalid id...")
@@ -191,6 +262,7 @@ while True:
             if role == "admin" or role == "editor":
                 utils.print_all_notes()
                 print(Fore.GREEN + "continue... ")
+                utils.build_log(username=username, message=" Viewed the note ")
                 input()
             elif role == "viewer":
                 utils.print_user_notes(username=username)
@@ -215,15 +287,35 @@ while True:
                     Fore.GREEN
                     + "[1] Count Sentences \n[2] Count Words\n[3] Top Frequent Words\n[4] Custom Tokenizer\n[5] Back\n"
                 )
-                user_choice = int(input(Fore.YELLOW + "Please select an option: "))
+                try:
+                    user_choice = int(input(Fore.YELLOW + "Please select an option: "))
+                except ValueError:
+                    print(Fore.RED + "invalid choice...")
+                    input()
+                    continue
+
                 if user_choice == 1:  # Count Sentences
                     nlp = spacy.load("en_core_web_sm")
                     print(
                         "[1] Count all sentences\n[2] Counting sentences in a specific note "
                     )
-                    text_analysis_choice = int(
-                        input(Fore.YELLOW + "Please select an option: ")
-                    )
+                    try:
+                        while True:
+                            text_analysis_choice = int(
+                                input(Fore.YELLOW + "Please select an option: ")
+                            )
+
+                            if text_analysis_choice in [1, 2]:
+                                break
+                            else:
+                                print(Fore.RED + "invalid choice...")
+                                input()
+                                continue
+                    except ValueError:
+                        print(Fore.RED + "invalid choice...")
+                        input()
+                        continue
+
                     all_notes_text = ""
                     if text_analysis_choice == 1:
                         for note in utils.return_notes_custom(1):
@@ -233,30 +325,50 @@ while True:
                         print(
                             f"there are {len(all_notes_list)} sentence on notes was write in notebook app...\n"
                         )
+                        utils.build_log(
+                            username=username, message="Viewed number of sentence "
+                        )
                         print(
                             Fore.BLUE
                             + "[1] To see all sentences (press enter to go back)  "
                         )
                         discuss = input()
-                        if int(discuss) == 1:
+                        if discuss == "1":
                             for sentence in all_notes_list:
                                 if sentence != all_notes_list[-1]:
                                     print(sentence, end=" , ")
                                 else:
                                     print(sentence)
+                            utils.build_log(
+                                username=username, message="viewed All notes sentence"
+                            )
                             input()
                     elif text_analysis_choice == 2:
                         print(
                             Fore.LIGHTYELLOW_EX
-                            + "Here are the notes. You should enter the note ID to edit it. 👇👇👇\n"
+                            + "Here are the notes. You should enter the note ID to view sentences. 👇👇👇\n"
                         )
                         utils.print_all_notes()
-                        user_choice_note_id = int(
-                            input(Fore.YELLOW + "Please select an option: ")
-                        )
-                        user_choice_note = (
-                            utils.return_notes_custom(2, user_choice_note_id)
-                        )[0][0]
+                        try:
+                            while True:
+                                user_choice_note_id = int(
+                                    input(Fore.YELLOW + "Please select an option: ")
+                                )
+                                if utils.check_id_in_notes(user_choice_note_id):
+                                    break
+                                else:
+                                    print(Fore.RED + "invalid ID...")
+
+                        except ValueError:
+                            print(Fore.RED + "invalid choice ...")
+                            input()
+                            continue
+                        note_result = utils.return_notes_custom(2, user_choice_note_id)
+                        if not note_result:
+                            print(Fore.RED + "Note not found...")
+                            input()
+                            continue
+                        user_choice_note = note_result[0][0]
                         nlp = spacy.load("en_core_web_sm")
                         doc = nlp(user_choice_note)
                         user_choice_note_sentences_list = [
@@ -270,8 +382,9 @@ while True:
                             Fore.BLUE
                             + "[1] To see all sentences (press enter to go back)  "
                         )
+
                         discuss = input()
-                        if int(discuss) == 1:
+                        if discuss == "1":
                             for sentence in user_choice_note_sentences_list:
                                 if sentence != user_choice_note_sentences_list[-1]:
                                     print(sentence, end=" , ")
@@ -289,9 +402,14 @@ while True:
                         Fore.BLUE
                         + "[1] Count all words\n[2] Counting words in a specific note "
                     )
-                    text_analysis_choice = int(
-                        input(Fore.YELLOW + "Please select an option: ")
-                    )
+                    try:
+                        text_analysis_choice = int(
+                            input(Fore.YELLOW + "Please select an option: ")
+                        )
+                    except ValueError:
+                        print(Fore.RED + "invalid choice...")
+                        input()
+                        continue
                     all_notes_text = ""
                     if text_analysis_choice == 1:  # to see all notes analys
                         text = ""
@@ -310,22 +428,46 @@ while True:
                             Fore.BLUE
                             + "[1] To see all sentences (press enter to go back)  "
                         )
+                        utils.build_log(
+                            username=username, message="Viewed number of words "
+                        )
                         discuss = input()
-                        if int(discuss) == 1:
+                        if discuss == "1":
                             for sentence in text_words_list:
                                 if sentence != text_words_list[-1]:
                                     print(sentence, end=" , ")
                                 else:
                                     print(sentence)
+                            utils.build_log(
+                                username=username, message="viewed all noted words  "
+                            )
                             print("\n")
                             input()
                     elif text_analysis_choice == 2:  # to see spacific note
                         print(
                             Fore.LIGHTYELLOW_EX
-                            + "Here are the notes. You should enter the note ID to edit it. 👇👇👇\n"
+                            + "Here are the notes. You should enter the note ID to view words. 👇👇👇\n"
                         )
                         utils.print_all_notes()
-                        note_id = input(Fore.BLUE + "Enter note id : ")
+                        try:
+                            while True:
+                                try:
+                                    note_id = int(input(Fore.BLUE + "Enter note id : "))
+                                except ValueError:
+                                    print(Fore.RED + "invalid id ....")
+                                    input()
+                                    continue
+                                if utils.check_id_in_notes(note_id):
+                                    break
+                                else:
+                                    print(Fore.RED + "invalid ID...")
+                                    input()
+                                    continue
+
+                        except:
+                            print(Fore.RED + "invalid choice...")
+                            input()
+                            continue
                         note = utils.return_notes_custom(2, int(note_id))
                         nlp = spacy.load("en_core_web_sm")
                         note_text = note[0][0]
@@ -342,7 +484,10 @@ while True:
                             + "[1] To see all sentences (press enter to go back)  "
                         )
                         discuss = input()
-                        if int(discuss) == 1:
+                        if discuss == "1":
+                            utils.build_log(
+                                username=username, message="Viewed all words "
+                            )
                             for word in custom_words_list:
                                 if word != custom_words_list[-1]:
                                     print(word, end=" , ")
@@ -356,6 +501,9 @@ while True:
                         continue
                 elif user_choice == 3:  # Top Frequent Words
                     models.top_frequent_words()
+                    utils.build_log(
+                        username=username, message="Viewd all number of words "
+                    )
                 elif user_choice == 4:  # Custom Tokenizer
                     my_token = input(Fore.YELLOW + "Enter your Tokenizer: ")
                     if not my_token.strip():
@@ -376,6 +524,7 @@ while True:
                         continue
                     if tokenize_choice == 1:
                         models.custom_tokenizer(my_token)
+                        input()
                     elif tokenize_choice == 2:
                         utils.print_all_notes()
                         try:
@@ -391,6 +540,9 @@ while True:
                             print(Fore.RED + "Invalid note ID...")
                             input()
                             continue
+                        utils.build_log(
+                            username=username, message="Used customize Token "
+                        )
                     else:
                         print(Fore.RED + "Please select a valid option (1 or 2)...")
                         input()
@@ -401,20 +553,193 @@ while True:
                     break
                 else:
                     print(Fore.RED + "invalid choice...")
-                    time.sleep(3)
+                    input()
                     continue
         else:
             print(Fore.RED + "Warning : you must be an admin to access this section")
             input()
             continue
-    elif choice == 4:
-        pass
+    # ======================================================= Search Engine ==========================================================
+    elif choice == 4:  # Search Engine
+        username, password, role = utils.login()
+        while True:
+            print(Fore.BLUE + pyfiglet.figlet_format("Search Engine"))
+            print(
+                Fore.BLUE
+                + "************************************************************"
+            )
+            print(
+                Fore.GREEN
+                + "[1] Build Inverted Index \n[2] Search Keyword \n[3] Show Search Stats\n[4] Save/Load Index\n[5] Back"
+            )
+            user_choice = input(Fore.BLUE + "Please enter your choice: ")
+            if user_choice == "1":  # inverted index
+                note_inverted_index = models.build_inverted_index()
+                discuss = input(
+                    Fore.GREEN + "[1] To see the indexes, press Enter to continue : "
+                )
+                if discuss == "1":
+                    tuple_index = tuple(note_inverted_index.items())
+                    print(utils.two_member_tuple_to_dictionary(tuple_index))
+                    input(Fore.GREEN + "\n continue...")
+                inverted_index = utils.append_dictionary_to_dictionary(
+                    inverted_index, note_inverted_index
+                )
+                utils.build_log(username=username, message="builded a inverted index")
+            elif user_choice == "2":  #  Search Keyword
+
+                while True:
+                    user_search = input(Fore.GREEN + "What are you looking for? ")
+                    if len(user_search) > 3:
+                        searched_ids = models.search_keyword(
+                            user_search=user_search, inverted_index=inverted_index
+                        )
+                        if searched_ids:
+                            for note_id in searched_ids:
+                                utils.print_note_by_id(note_id)
+                            utils.append_dictionary_to_dictionary(
+                                inverted_index, {user_search: searched_ids}
+                            )
+                            utils.append_dictionary_to_dictionary(
+                                search_status, {user_search: searched_ids}
+                            )
+                            utils.build_log(
+                                username=username, message="searched for a keyword"
+                            )
+                            input(
+                                Fore.GREEN
+                                + "Search completed. Press Enter to continue..."
+                            )
+                            break
+                        else:
+                            discuss = input(
+                                Fore.RED
+                                + "Nothing found, press 1 to continue or Enter to go back"
+                            )
+                            if discuss == "1":
+                                continue
+                            else:
+                                break
+                    else:
+                        print(Fore.RED + "Please enter at least 3 characters.")
+                        input()
+                        continue
+                utils.build_log(username=username, message="searched")
+            elif user_choice == "3":  # Show Search Stats
+                models.show_search_stats(search_status)
+                input()
+                utils.build_log(username=username, message="builded a inverted index")
+                continue
+            elif user_choice == "4":  # Save/Load Index
+                print(Fore.GREEN + "[1] Save index\n[2] Load index \n[3] Back")
+                while True:
+                    sub_choice = input()
+                    if sub_choice == "1":
+                        if not inverted_index:
+                            print(Fore.RED + "Saved an index")
+                            input()
+                            break
+                        models.save_index(inverted_index)
+                        utils.build_log(username=username, message="saved a index")
+                        print(Fore.GREEN + "Index saved successfully.")
+                        input()
+                        break
+                    elif sub_choice == "2":
+                        try:
+                            inverted_index = models.load_index()
+                            if inverted_index is None:
+                                print(Fore.RED + "No saved index found.")
+                                input()
+                                break
+                        except:
+                            print(Fore.RED + "No saved index found.")
+                            input()
+                            break
+                        print(Fore.GREEN + "Index loaded successfully.")
+                        utils.build_log(username=username, message="loaded a index")
+                        input()
+                        break
+                    elif sub_choice == "3":
+                        break
+                    else:
+                        print(Fore.RED + "Invalid choice...")
+                        input()
+                        continue
+
+            elif user_choice == "5":  # Back
+                print(Fore.GREEN + "Back...")
+                time.sleep(2)
+                break
+            else:
+                print(Fore.RED + "Invalid choice...")
+                input()
+                continue
+
+    # ======================================================= Backup & Archive ==========================================================
+
     elif choice == 5:
-        pass
+        username, password, role = utils.login()
+        while True:
+            print(Fore.BLUE + pyfiglet.figlet_format("Backup & Archive"))
+            print(
+                Fore.BLUE
+                + "************************************************************"
+            )
+            print(
+                Fore.GREEN
+                + "[1] Create Backup \n[2] Restore Backup \n[3] List Backups \n[4] Configure Backup Path \n[5] Back"
+            )
+            user_choice = input(Fore.BLUE + "Please enter your choice: ")
+            if user_choice == "1":
+                models.create_backup()
+            elif user_choice == "2":
+                models.restore_backup()
+            elif user_choice == "3":
+                models.list_backups()
+            elif user_choice == "4":
+                models.configure_backup_path()
+            elif user_choice == "5":
+                break
+            else:
+                print(Fore.RED + "Invalid choice...")
+                input()
+                continue
+    # =========================================================  Reports  ==========================================================
     elif choice == 6:
-        pass
+        username, password, role = utils.login()
+        if role in ["admin", "editor"]:
+            while True:
+                print(Fore.BLUE + pyfiglet.figlet_format("Reports"))
+                print(
+                    Fore.BLUE
+                    + "************************************************************"
+                )
+                print(
+                    Fore.GREEN
+                    + "[1] Generate Text Report \n[2] Generate PDF Report \n[3] Show Logs \n[4] Back"
+                )
+                user_choice = input(Fore.BLUE + "Please enter your choice: ")
+                if user_choice == "1":
+                    models.generate_text_report()
+                elif user_choice == "2":
+                    models.generate_pdf_report()
+                elif user_choice == "3":
+                    models.show_logs()
+                elif user_choice == "4":
+                    break
+                else:
+                    print(Fore.RED + "Invalid choice...")
+                    input()
+                    continue
+        else:
+            print(Fore.RED + "Access denied.")
+            input()
+            continue
+    # ======================================================= Custom Tools ==========================================================
     elif choice == 7:
-        pass
+        print(Fore.GREEN + "Coming soon...")
+        input()
+        continue
     elif choice == 0:
         print(Fore.RED + "Goodbye...")
         input()
