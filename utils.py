@@ -1,4 +1,4 @@
-import sqlite3, hashlib, json, spacy, logging
+import sqlite3, hashlib, json, spacy, logging, nltk
 from colorama import init, Fore
 
 
@@ -379,16 +379,20 @@ def return_notes_custom(  # return all notes(if user_input=1) else return notes 
 
 
 def return_all_notes_elemans_custom(
-    user_input: int, *args
-):  # return all notes(if user_input=1) else return notes with id
+    user_input: int, *args, offset: int = 0, limit: int = None
+):
     with sqlite3.connect("db/Notes.db") as conn:
         cursor = conn.cursor()
         if user_input == 1:
-            cursor.execute(
+            query = (
                 "SELECT id, username, subject, note, Tags FROM NOTES ORDER BY username"
             )
-            result = cursor.fetchall()
-            return result
+            if limit is not None:
+                query += " LIMIT ? OFFSET ?"
+                cursor.execute(query, (limit, offset))
+            else:
+                cursor.execute(query)
+            return cursor.fetchall()
         elif user_input == 2:
             if args:
                 try:
@@ -452,16 +456,15 @@ def print_two_member_tuple_to_dictionary(
             )
 
 
-def convert_sentence_to_word(note):  # convert note to words lists
-    text = note
-    nlp = spacy.load("en_core_web_sm")
-    doc = nlp(text)
-    total = [
-        token.text.lower()
-        for token in doc
-        if not token.is_punct and token.is_alpha and len(token.text) > 1
+nltk.download("punkt", quiet=True)
+
+
+def convert_sentence_to_word(note):
+    return [
+        word.lower()
+        for word in nltk.tokenize.word_tokenize(note)
+        if word.isalpha() and len(word) > 1
     ]
-    return total
 
 
 def append_dictionary_with_id(main_dict: dict, append_list: list, note_id: int):

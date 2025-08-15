@@ -419,26 +419,42 @@ def custom_tokenizer(my_token: str, *args):  # Escape special regex characters
 ####################################################section four#########################################################
 
 
-def build_inverted_index():  # create inverted index in all around database
-    x = 0
-    inverted_index = defaultdict(list)
-    all_notes = utils.return_all_notes_elemans_custom(1)
-    for note in all_notes:
-        note_tokens = utils.convert_sentence_to_word(note=note[2])
-        note_tokens.extend(utils.convert_sentence_to_word(note=note[3]))
-        utils.append_dictionary_with_id(
-            main_dict=inverted_index, append_list=note_tokens, note_id=note[0]
-        )
-        x += 1
-        sys.stdout.write(
-            "\r"
-            + Fore.BLUE
-            + f"{x} notes out of {len(all_notes)} notes were processing!"
-        )
-        sys.stdout.flush()
-    sys.stdout.write("\r" + "\nfinish\n ")
-    sys.stdout.flush()
+from multiprocessing import Pool
 
+
+def build_inverted_index():
+    batch_size = 1000
+    offset = 0
+    inverted_index = defaultdict(list)
+
+    # شمارش تعداد کل نوت‌ها
+    with sqlite3.connect("db/Notes.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM NOTES")
+        total_notes = cursor.fetchone()[0]
+
+    # پردازش بچ‌ها
+    with Pool() as pool:
+        while offset < total_notes:
+            all_notes = utils.return_all_notes_elemans_custom(
+                1, offset=offset, limit=batch_size
+            )
+            if not all_notes:
+                break
+            for note in all_notes:
+                note_tokens = utils.convert_sentence_to_word(note=note[2])
+                note_tokens.extend(utils.convert_sentence_to_word(note=note[3]))
+                utils.append_dictionary_with_id(
+                    main_dict=inverted_index, append_list=note_tokens, note_id=note[0]
+                )
+            offset += batch_size
+            sys.stdout.write(
+                f"\r{Fore.BLUE}{min(offset, total_notes)} notes out of {total_notes} notes were processing!"
+            )
+            sys.stdout.flush()
+
+    sys.stdout.write("\r\nfinish\n")
+    sys.stdout.flush()
     return inverted_index
 
 
@@ -460,7 +476,7 @@ def show_search_stats(search_status):
     input(Fore.GREEN + "\n continue...")
 
 
-def save_index(inverted_index):
+def save_index(inverted_index):  # save index
     with open("index/inverted_index.pkl", "wb") as file:
         pickle.dump(inverted_index, file)
     print(Fore.GREEN + "Inverted index saved successfully.")
