@@ -138,7 +138,7 @@ def get_role_with_username(username):  # get user role with username
 
 def guss_password(true_password):  # chances to guss true password
     for guss_number in range(3, -1, -1):
-        guss = input(Fore.YELLOW + "please enter your password: ")
+        guss = input(Fore.RED + "please enter your password: ")
         if password_to_hash(guss) == true_password:
             return True
         elif guss_number <= 0:

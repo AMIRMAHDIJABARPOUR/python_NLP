@@ -182,7 +182,6 @@ def delete_user(username, *args):  # delete user function
     else:
         logging.warning(f"User {username} not found")
         print(f"{Fore.RED}User {username} not found")
-    input(f"{Fore.YELLOW}Press Enter to continue...")
 
 
 def list_of_all_users():
