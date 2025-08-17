@@ -37,3 +37,69 @@
 2025-08-17 05:07:42 - [34mamirmahdi : [32mloaded a index
 2025-08-17 05:08:20 - [34mamirmahdi : [32msearched for a keyword
 2025-08-17 05:08:20 - [34mamirmahdi : [32msearched
+2025-08-17 07:01:36 - [34mUser Added  : [32mmehdiezati Added successfully
+2025-08-17 07:01:52 - [34muser : [32mView the list of useres 
+2025-08-17 07:12:01 - [34mUser Added  : [32mmahdi Added successfully
+2025-08-17 07:12:14 - [34muser : [32mView the list of useres 
+2025-08-17 07:16:17 - User amirmahdi successfully deleted by amirmahdi
+2025-08-17 07:16:34 - [34mUser Added  : [32mamirmahdi Added successfully
+2025-08-17 07:19:46 - [34mUser Added  : [32mamirmahdi Added successfully
+2025-08-17 07:20:18 - [34mUser Added  : [32momid Added successfully
+2025-08-17 07:20:38 - [34mUser Added  : [32mmehdiezati Added successfully
+2025-08-17 07:20:56 - [34mUser Added  : [32mmehdi Added successfully
+2025-08-17 07:21:15 - [34muser : [32mView the list of useres 
+2025-08-17 07:22:23 - Username edited for omid to Omid by amirmahdi
+2025-08-17 07:22:34 - Role edited for omid to viewer by amirmahdi
+2025-08-17 07:22:44 - User omid updated by amirmahdi
+2025-08-17 07:23:19 - Role edited for Omid to editor by amirmahdi
+2025-08-17 07:23:21 - User Omid updated by amirmahdi
+2025-08-17 07:23:33 - [34muser : [32mView the list of useres 
+2025-08-17 07:23:53 - User Omid successfully deleted by mehdiezati
+2025-08-17 07:24:10 - [34muser : [32mView the list of useres 
+2025-08-17 07:25:19 - [34mamirmahdi : [32mSuccessfuly Added the note 
+2025-08-17 07:25:27 - [34mamirmahdi : [32m Viewed the note 
+2025-08-17 07:26:38 - [34mamirmahdi : [32msuccessfuly edited the  note 
+2025-08-17 07:26:47 - [34mamirmahdi : [32m Viewed the note 
+2025-08-17 07:27:11 - [34mamirmahdi : [32msuccessfuly deleted the  note 
+2025-08-17 07:32:44 - [34mUser Added  : [32marshia Added successfully
+2025-08-17 07:33:04 - [34muser : [32mView the list of useres 
+2025-08-17 07:33:29 - Username edited for arshia to AArshia by amirmahdi
+2025-08-17 07:33:41 - Role edited for arshia to editor by amirmahdi
+2025-08-17 07:33:46 - User arshia updated by amirmahdi
+2025-08-17 07:34:05 - User AArshia successfully deleted by amirmahdi
+2025-08-17 07:35:11 - [34mamirmahdi : [32mSuccessfuly Added the note 
+2025-08-17 07:36:26 - [34mamirmahdi : [32msuccessfuly edited the  note 
+2025-08-17 07:36:42 - [34mamirmahdi : [32m Viewed the note 
+2025-08-17 07:37:19 - [34mamirmahdi : [32msuccessfuly deleted the  note 
+2025-08-17 07:37:35 - [34mamirmahdi : [32m Viewed the note 
+2025-08-17 07:38:21 - [34mamirmahdi : [32mViewed number of sentence 
+2025-08-17 07:38:35 - [34mamirmahdi : [32mviewed All notes sentence
+2025-08-17 07:43:01 - [34mUser Added  : [32mamirmahdi Added successfully
+2025-08-17 07:43:39 - Username edited for user1 to second user by amirmahdi
+2025-08-17 07:43:50 - Password edited for user1 by amirmahdi
+2025-08-17 07:43:53 - User user1 updated by amirmahdi
+2025-08-17 07:44:24 - User user2 successfully deleted by amirmahdi
+2025-08-17 07:44:44 - [34muser : [32mView the list of useres 
+2025-08-17 07:45:40 - [34mamirmahdi : [32mSuccessfuly Added the note 
+2025-08-17 07:45:53 - [34mamirmahdi : [32m Viewed the note 
+2025-08-17 07:46:37 - [34mamirmahdi : [32msuccessfuly edited the  note 
+2025-08-17 07:46:54 - [34mamirmahdi : [32m Viewed the note 
+2025-08-17 07:47:15 - [34mamirmahdi : [32msuccessfuly deleted the  note 
+2025-08-17 07:47:24 - [34mamirmahdi : [32m Viewed the note 
+2025-08-17 07:48:04 - [34mamirmahdi : [32mViewed number of sentence 
+2025-08-17 07:48:17 - [34mamirmahdi : [32mviewed All notes sentence
+2025-08-17 07:48:35 - [34mamirmahdi : [32mViewed number of words 
+2025-08-17 07:48:56 - [34mamirmahdi : [32mviewed all noted words  
+2025-08-17 07:49:31 - [34mamirmahdi : [32mViewd all number of words 
+2025-08-17 07:50:38 - [34mamirmahdi : [32mbuilded a inverted index
+2025-08-17 07:50:45 - [34mamirmahdi : [32msaved a index
+2025-08-17 07:51:09 - Inverted index loaded: index/inverted_index.pkl
+2025-08-17 07:51:11 - [34mamirmahdi : [32mloaded a index
+2025-08-17 07:51:19 - [34mamirmahdi : [32msearched
+2025-08-17 07:51:45 - [34mamirmahdi : [32msearched for a keyword
+2025-08-17 07:51:49 - [34mamirmahdi : [32msearched
+2025-08-17 07:52:04 - [34mamirmahdi : [32mbuilded a inverted index
+2025-08-17 07:52:36 - Backup restored: backups/backup_20250817_075221.zip
+2025-08-17 07:52:40 - Listed backups in backups/
+2025-08-17 07:53:06 - Text report generated: reports/report.txt
+2025-08-17 07:53:22 - Displayed log file: logs/logs.txt

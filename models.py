@@ -19,7 +19,6 @@ def add_user():  # add user function
 
 
 def edit_user(admin_username, admin_password_hash):  # edit user funcrion
-
     while True:
         if not utils.search_user(admin_username):
             print(
@@ -35,7 +34,7 @@ def edit_user(admin_username, admin_password_hash):  # edit user funcrion
             input()
             return
         target_username = input(
-            Fore.YELLOW + "Enter username to edit: " + Style.RESET_ALL
+            Fore.CYAN + "Enter username to edit: " + Style.RESET_ALL
         )
         if not utils.search_user(target_username):
             print(
@@ -55,7 +54,7 @@ def edit_user(admin_username, admin_password_hash):  # edit user funcrion
                 + "[1] Change Username\n[2] Change Password\n[3] Change Role\n[4] Save and Exit"
             )
             choice_input = input(
-                Fore.YELLOW + "Choose an option to edit: " + Style.RESET_ALL
+                Fore.CYAN + "Choose an option to edit: " + Style.RESET_ALL
             )
             if not choice_input.isdigit():
                 print(
@@ -68,11 +67,10 @@ def edit_user(admin_username, admin_password_hash):  # edit user funcrion
             if choice == 1:
                 while True:
                     username_input = input(
-                        Fore.YELLOW
+                        Fore.CYAN
                         + "Enter new username (Enter to keep current): "
                         + Style.RESET_ALL
                     )
-
                     if not username_input:
                         break
                     if len(username_input) < 3:
@@ -93,14 +91,15 @@ def edit_user(admin_username, admin_password_hash):  # edit user funcrion
                         input()
                         continue
                     new_username = username_input
-                    utils.build_database(
-                        username=admin_username, message="Username Successfuly eddited"
+                    logging.info(
+                        f"Username edited for {target_username} to {new_username} by {admin_username}"
                     )
+                    print(Fore.GREEN + "Username successfully edited")
                     break
             elif choice == 2:
                 while True:
                     password_input = input(
-                        Fore.YELLOW
+                        Fore.CYAN
                         + "Enter new password (Enter to keep current): "
                         + Style.RESET_ALL
                     )
@@ -114,15 +113,16 @@ def edit_user(admin_username, admin_password_hash):  # edit user funcrion
                         input()
                         continue
                     new_password = utils.password_to_hash(password_input)
-                    utils.build_database(
-                        username=admin_username, message="Password successfuly edited "
+                    logging.info(
+                        f"Password edited for {target_username} by {admin_username}"
                     )
+                    print(Fore.GREEN + "Password successfully edited")
                     break
             elif choice == 3:
                 acceptable_roles = ["admin", "editor", "viewer"]
                 while True:
                     role_input = input(
-                        Fore.YELLOW
+                        Fore.CYAN
                         + "Enter new role (admin/editor/viewer, Enter to keep current): "
                         + Style.RESET_ALL
                     )
@@ -136,9 +136,10 @@ def edit_user(admin_username, admin_password_hash):  # edit user funcrion
                         input()
                         continue
                     new_role = role_input.lower()
-                    utils.build_database(
-                        username=admin_username, message="Role successfuly edited "
+                    logging.info(
+                        f"Role edited for {target_username} to {new_role} by {admin_username}"
                     )
+                    print(Fore.GREEN + "Role successfully edited")
                     break
             elif choice == 4:
                 break
@@ -160,6 +161,7 @@ def edit_user(admin_username, admin_password_hash):  # edit user funcrion
                 new_password,
                 new_role,
             )
+            logging.info(f"User {target_username} updated by {admin_username}")
             print(Fore.GREEN + "User updated successfully! Press Enter to return...")
             input()
         else:
@@ -168,16 +170,19 @@ def edit_user(admin_username, admin_password_hash):  # edit user funcrion
         break
 
 
-def delete_user(username, *args):  # delete user funcrion
-
+def delete_user(username, *args):  # delete user function
     if utils.search_user(username):
         with sqlite3.connect("db/Notes.db") as conn:
             cursor = conn.cursor()
-            cursor.execute("DELETE FROM USERS WHERE Username = ?", (username,))
+            cursor.execute("DELETE FROM NOTES WHERE username = ?", (username,))
+            cursor.execute("DELETE FROM USERS WHERE username = ?", (username,))
             conn.commit()
-        utils.build_database(
-            username=args[0], message=f"{username} successfuly deleted"
-        )
+        logging.info(f"User {username} successfully deleted by {args[0]}")
+        print(f"{Fore.GREEN}User {username} successfully deleted")
+    else:
+        logging.warning(f"User {username} not found")
+        print(f"{Fore.RED}User {username} not found")
+    input(f"{Fore.YELLOW}Press Enter to continue...")
 
 
 def list_of_all_users():

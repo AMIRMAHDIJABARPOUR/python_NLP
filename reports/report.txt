@@ -1,12 +1,12 @@
 Smart Notebook Report
-Generated at: 2025-08-17 05:06:30
+Generated at: 2025-08-17 07:53:06
 --------------------------------------------------
-Total Users: 51
-Total Notes: 712
-Total Words: 5571
+Total Users: 50
+Total Notes: 494
+Total Words: 32737
 Top 5 Frequent Words:
-  accept: 14
-  floor: 14
-  of: 14
-  life: 13
-  step: 13
+  the: 3447
+  to: 2227
+  is: 1449
+  for: 1133
+  be: 767

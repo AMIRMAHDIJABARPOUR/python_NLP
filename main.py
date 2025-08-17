@@ -86,7 +86,7 @@ while True:
                             + "wrong username Enter 1 to back or press Enter to continue"
                         )
                         x = input()
-                        if int(x) == 1:
+                        if x == "1":
                             break
                         else:
                             continue
@@ -652,9 +652,7 @@ while True:
                             print(Fore.RED + "No saved index found.")
                             input()
                             break
-                        print(Fore.GREEN + "Index loaded successfully.")
                         utils.build_log(username=username, message="loaded a index")
-                        input()
                         break
                     elif sub_choice == "3":
                         break
