@@ -1,7 +1,9 @@
 from collections import Counter, defaultdict
 from colorama import init, Fore, Style
 import models, utils, pyfiglet, sqlite3, time, spacy, logging
+import nltk
 
+nltk.download("punkt_tab")
 inverted_index, search_status = defaultdict(list), defaultdict(list)
 logging.basicConfig(
     filename="logs/logs.txt",
@@ -217,8 +219,6 @@ while True:
                         utils.build_log(
                             username=username, message="successfuly deleted the  note "
                         )
-                        print(Fore.RED + "successfuly deleted the  note ")
-                        input()
                         break
                     else:
                         print(Fore.RED + "invalid id...")
@@ -627,7 +627,6 @@ while True:
                 utils.build_log(username=username, message="searched")
             elif user_choice == "3":  # Show Search Stats
                 models.show_search_stats(search_status)
-                input()
                 utils.build_log(username=username, message="builded a inverted index")
                 continue
             elif user_choice == "4":  # Save/Load Index
@@ -641,8 +640,6 @@ while True:
                             break
                         models.save_index(inverted_index)
                         utils.build_log(username=username, message="saved a index")
-                        print(Fore.GREEN + "Index saved successfully.")
-                        input()
                         break
                     elif sub_choice == "2":
                         try:
@@ -677,7 +674,7 @@ while True:
 
     # ======================================================= Backup & Archive ==========================================================
 
-    elif choice == 5:
+    elif choice == 5:  # Backup & Archive
         username, password, role = utils.login()
         while True:
             print(Fore.BLUE + pyfiglet.figlet_format("Backup & Archive"))

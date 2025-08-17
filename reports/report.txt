@@ -1,0 +1,12 @@
+Smart Notebook Report
+Generated at: 2025-08-17 05:06:30
+--------------------------------------------------
+Total Users: 51
+Total Notes: 712
+Total Words: 5571
+Top 5 Frequent Words:
+  accept: 14
+  floor: 14
+  of: 14
+  life: 13
+  step: 13

@@ -22,3 +22,18 @@
 2025-08-16 03:23:08 - [34mamirmahdi : [32mbuilded a inverted index
 2025-08-16 03:23:33 - [34mamirmahdi : [32msaved a index
 2025-08-16 03:24:24 - [34mamirmahdi : [32msearched
+2025-08-16 03:27:46 - [34mamirmahdi : [32mbuilded a inverted index
+2025-08-16 03:36:30 - [34mamirmahdi : [32mbuilded a inverted index
+2025-08-16 16:05:05 - [34mamirmahdi : [32mbuilded a inverted index
+2025-08-16 18:58:59 - [34mamirmahdi : [32mloaded a index
+2025-08-16 19:00:56 - Backup restored: backups/backup_20250816_190048.zip
+2025-08-17 05:05:32 - Backup restored: backups/backup_20250816_190058.zip
+2025-08-17 05:05:35 - Listed backups in backups/
+2025-08-17 05:06:08 - Listed backups in backups/
+2025-08-17 05:06:10 - Backup path configured: backups/
+2025-08-17 05:06:30 - Text report generated: reports/report.txt
+2025-08-17 05:06:39 - Displayed log file: logs/logs.txt
+2025-08-17 05:07:39 - Inverted index loaded: index/inverted_index.pkl
+2025-08-17 05:07:42 - [34mamirmahdi : [32mloaded a index
+2025-08-17 05:08:20 - [34mamirmahdi : [32msearched for a keyword
+2025-08-17 05:08:20 - [34mamirmahdi : [32msearched

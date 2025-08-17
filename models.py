@@ -1,4 +1,4 @@
-import utils, spacy, sqlite3, re, json, sys, pickle
+import utils, spacy, sqlite3, re, json, sys, pickle, zipfile, os, time, logging, argparse, shutil, datetime, spacy
 from colorama import init, Fore, Style
 from collections import Counter, defaultdict
 
@@ -175,7 +175,6 @@ def delete_user(username, *args):  # delete user funcrion
             cursor = conn.cursor()
             cursor.execute("DELETE FROM USERS WHERE Username = ?", (username,))
             conn.commit()
-            conn.close()
         utils.build_database(
             username=args[0], message=f"{username} successfuly deleted"
         )
@@ -484,13 +483,238 @@ def save_index(inverted_index):  # save index
 
 
 def load_index():
-    pickle_file_path = "index/inverted_index.pkl"
+    index_file = "index/inverted_index.pkl"
+    if not os.path.exists(index_file):
+        logging.warning("Inverted index file not found: index/inverted_index.pkl")
+        print(f"{Fore.RED}Inverted index file not found: index/inverted_index.pkl")
+        input(f"{Fore.YELLOW}Press Enter to continue...")
+        return {}
+    with open(index_file, "rb") as f:
+        index = pickle.load(f)
+        logging.info("Inverted index loaded: index/inverted_index.pkl")
+        print(
+            f"{Fore.GREEN}Inverted index loaded successfully: index/inverted_index.pkl"
+        )
+        input(f"{Fore.YELLOW}Press Enter to continue...")
+        return index
+
+
+####################################################section five #########################################################
+
+
+def create_backup(backup_path="backups/"):  # create bckup
+
     try:
-        with open(pickle_file_path, "rb") as file:
-            inverted_index = pickle.load(file)
-        print(Fore.GREEN + "Inverted index loaded successfully.")
-        return inverted_index
-    except FileNotFoundError:
-        print(Fore.RED + "Inverted index file not found. Please build the index first.")
+        backup_file = os.path.join(
+            backup_path, f"backup_{time.strftime("%Y%m%d_%H%M%S")}.zip"
+        )
+
+        zip_files_list = [
+            "db/Notes.db",
+            "index/inverted_index.pkl",
+            "logs/logs.txt",
+            "reports/report.txt",
+        ]
+
+        files_backed_up = []
+
+        with zipfile.ZipFile(backup_file, "w", zipfile.ZIP_DEFLATED) as z:
+            for file in zip_files_list:
+                if os.path.exists(file):
+                    z.write(file, arcname=os.path.basename(file))
+                    files_backed_up.append(file)
+                else:
+                    logging.warning(f"File not found for backup: {file}")
+
+        if not files_backed_up:
+            logging.warning(f"No files were backed up in {backup_file}")
+            print(f"{Fore.RED}No files were backed up.")
+            return
+
+        print(f"{Fore.GREEN}Backup created successfully: {backup_file}")
         input()
-        return None
+
+    except:
+        logging.error(f"Failed to create backup")
+        print(f"{Fore.RED}Error creating backup")
+
+
+def restore_backup(backup_path="backups/"):
+    try:
+
+        if not os.path.exists(backup_path):
+            logging.error(f"Backup directory not found: {backup_path}")
+            print(f"{Fore.RED}Backup directory not found: {backup_path}")
+            input()
+            return
+
+        backups = [f for f in os.listdir(backup_path) if f.endswith(".zip")]
+
+        if not backups:
+            logging.warning(f"No backups found in {backup_path}")
+            print(f"{Fore.RED}No backups found in {backup_path}")
+            return
+
+        print(f"{Fore.BLUE}Available backups:")
+        for i, backup in enumerate(backups, 1):
+            print(f"[{i}] {backup}")
+
+        choice = input(f"{Fore.YELLOW}Enter backup number to restore: ")
+
+        try:
+            choice = int(choice) - 1
+            if 0 <= choice < len(backups):
+                backup_file = os.path.join(backup_path, backups[choice])
+
+                with zipfile.ZipFile(backup_file, "r") as z:
+                    for file in z.namelist():
+                        if file in [
+                            "Notes.db",
+                            "logs.txt",
+                            "report.txt",
+                            "inverted_index.pkl",
+                        ]:
+                            dest_dir = {
+                                "Notes.db": "db",
+                                "logs.txt": "logs",
+                                "report.txt": "reports",
+                                "inverted_index.pkl": "index",
+                            }[file]
+                            os.makedirs(dest_dir, exist_ok=True)
+
+                            z.extract(file, dest_dir)
+
+                logging.info(f"Backup restored: {backup_file}")
+                print(f"{Fore.GREEN}Backup restored successfully: {backup_file}")
+                input()
+            else:
+
+                logging.warning(f"Invalid backup number: {choice + 1}")
+                print(f"{Fore.RED}Invalid backup number")
+        except ValueError:
+
+            logging.warning(f"Invalid input for restore: {choice}")
+            print(f"{Fore.RED}Invalid input")
+
+    except Exception as e:
+        logging.error(f"Failed to restore backup: {str(e)}")
+        print(f"{Fore.RED}Error restoring backup: {str(e)}")
+
+
+def list_backups(backup_path="backups/"):
+
+    try:
+        if not os.path.exists(backup_path):
+            logging.error(f"Backup directory not found: {backup_path}")
+            print(f"{Fore.RED}Backup directory not found: {backup_path}")
+            return
+        backups = [f for f in os.listdir(backup_path) if f.endswith(".zip")]
+        if not backups:
+            logging.warning(f"No backups found in {backup_path}")
+            print(f"{Fore.RED}No backups found in {backup_path}")
+            return
+        print(f"{Fore.BLUE}Available backups:")
+        for i, backup in enumerate(backups, 1):
+            print(f"[{i}] {backup}")
+        logging.info(f"Listed backups in {backup_path}")
+    except Exception as e:
+        logging.error(f"Failed to list backups: {str(e)}")
+        print(f"{Fore.RED}Error listing backups: {str(e)}")
+    input()
+
+
+def configure_backup_path():
+
+    parser = argparse.ArgumentParser(description="Configure backup path")
+
+    parser.add_argument(
+        "--backup-path", default="backups/", help="Path to store backups"
+    )
+
+    args = parser.parse_args()
+    backup_path = args.backup_path
+
+    try:
+        if not os.path.exists(backup_path):
+            os.makedirs(backup_path)
+            logging.info(f"Created backup directory: {backup_path}")
+            print(f"{Fore.YELLOW}Created backup directory: {backup_path}")
+
+        if not os.access(backup_path, os.W_OK):
+            raise PermissionError(f"No write permission for {backup_path}")
+
+        logging.info(f"Backup path configured: {backup_path}")
+        print(f"{Fore.GREEN}Backup path set to: {backup_path}")
+        input()
+        return backup_path
+
+    except Exception as e:
+        logging.error(f"Failed to configure backup path: {str(e)}")
+        print(f"{Fore.RED}Error configuring backup path: {str(e)}")
+        return "backups/"
+
+
+def generate_text_report():
+    os.makedirs("reports", exist_ok=True)
+    with sqlite3.connect("db/Notes.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM USERS")
+        total_users = cursor.fetchone()[0]
+        cursor.execute("SELECT COUNT(*) FROM NOTES")
+        total_notes = cursor.fetchone()[0]
+        cursor.execute("SELECT note FROM NOTES")
+        notes = [row[0] for row in cursor.fetchall()]
+
+    all_words = []
+    for note in notes:
+        words = [word.lower() for word in note.split() if word.isalpha()]
+        all_words.extend(words)
+    total_words = len(all_words)
+    top_words = Counter(all_words).most_common(5)
+
+    report_content = f"Smart Notebook Report\n"
+    report_content += (
+        f"Generated at: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+    )
+    report_content += f"{'-' * 50}\n"
+    report_content += f"Total Users: {total_users}\n"
+    report_content += f"Total Notes: {total_notes}\n"
+    report_content += f"Total Words: {total_words}\n"
+    report_content += f"Top 5 Frequent Words:\n"
+    for word, count in top_words:
+        report_content += f"  {word}: {count}\n"
+
+    with open("reports/report.txt", "w", encoding="utf-8") as f:
+        f.write(report_content)
+
+    try:
+        logging.info("Text report generated: reports/report.txt")
+        print(f"{Fore.GREEN}Text report generated successfully: reports/report.txt")
+        input()
+    except Exception as e:
+        print("log failed")
+        input()
+
+
+def show_logs():
+    if not os.path.exists("logs/logs.txt"):
+        logging.warning("Log file not found: logs/logs.txt")
+        print(f"{Fore.RED}Log file not found: logs/logs.txt")
+        return
+
+    with open("logs/logs.txt", "r", encoding="utf-8") as f:
+        logs = f.readlines()
+        if not logs:
+            print(f"{Fore.YELLOW}Log file is empty.")
+            return
+        print(f"{Fore.BLUE}Log Contents:")
+        for log in logs:
+            print(f"{Fore.CYAN}{log.strip()}")
+        input()
+
+        logging.info("Displayed log file: logs/logs.txt")
+
+
+def generate_pdf_report():
+    print(f"{Fore.GREEN} coming soon...")
+    input()

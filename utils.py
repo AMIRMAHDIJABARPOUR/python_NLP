@@ -1,6 +1,8 @@
 import sqlite3, hashlib, json, spacy, logging, nltk
 from colorama import init, Fore
 
+init(autoreset=True)  # Initialize colorama for colored output
+
 
 def build_log(username, message):
     logging.info(Fore.BLUE + f"{username} : " + Fore.GREEN + f"{message}")
@@ -13,9 +15,6 @@ def two_member_tuple_to_dictionary(
     for member in list_of_tuples:
         returned_dict[member[0]] = member[1]
     return returned_dict
-
-
-init(autoreset=True)
 
 
 def build_database():  # creating database
@@ -305,8 +304,11 @@ def print_note_by_id(note_id):  # Print a single note by its ID
             for i in range(0, len(note[3]), 80):
                 print(Fore.WHITE + note[3][i : i + 80])
             print(Fore.GREEN + "tags: ", end="")
-            for tag in json.loads(note[4]):
-                print(tag, end="  ")
+            try:
+                for tag in json.loads(note[4]):
+                    print(tag, end="  ")
+            except:
+                print(None)
             print(
                 "\n================================================================================\n"
             )
@@ -339,8 +341,11 @@ def print_all_notes():  # All users Notes
             for i in range(0, len(note[3]), 80):
                 print(Fore.WHITE + note[3][i : i + 80])
             print(Fore.GREEN + "tags: ", end="")
-            for tag in json.loads(note[4]):
-                print(tag, end="  ")
+            try:
+                for tag in json.loads(note[4]):
+                    print(tag, end="  ")
+            except:
+                print("None")
             print(
                 "\n================================================================================\n"
             )
