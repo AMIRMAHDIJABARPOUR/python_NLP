@@ -279,12 +279,19 @@ def top_frequent_words():  # print frequent word
         while True:
             try:
                 note_id = int(input(Fore.BLUE + "Enter note id : "))
-                break
+                if utils.check_id_in_notes(note_id):
+                    break
+                else:
+                    print(Fore.RED + "invalid id ...")
+                    input()
             except:
                 print(Fore.RED + "invalid id ....")
                 input()
-                continue
         note = utils.return_notes_custom(2, int(note_id))
+        if not note:
+            print(Fore.RED + "Note not found ...")
+            input()
+            return
         nlp = spacy.load("en_core_web_sm")
         note_text = note[0][0]
         doc = nlp(note_text)
@@ -355,8 +362,11 @@ def custom_tokenizer(my_token: str, *args):  # Escape special regex characters
                     for i in range(0, len(note[3]), 80):
                         print(Fore.WHITE + note[3][i : i + 80])
                     print(Fore.GREEN + "tags: ", end="")
-                    for tag in json.loads(note[4]):
-                        print(tag, end="  ")
+                    try:
+                        for tag in json.loads(note[4]):
+                            print(tag, end="  ")
+                    except:
+                        print(None)
                     print(
                         "\n================================================================================\n"
                     )
@@ -473,9 +483,8 @@ def search_keyword(user_search, inverted_index):
 
 
 def show_search_stats(search_status):
-
     tuple_index = tuple(search_status.items())
-    print(utils.two_member_tuple_to_dictionary(tuple_index))
+    utils.print_two_member_tuple_to_dictionary(tuple_index)
     input(Fore.GREEN + "\n continue...")
 
 

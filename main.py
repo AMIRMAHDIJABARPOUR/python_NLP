@@ -142,7 +142,13 @@ while True:
                     + "Here are the notes. You should enter the note ID to edit it. 👇👇👇\n"
                 )
                 utils.print_all_notes()
+                if not utils.return_all_notes_elemans_custom(1):
+                    print(Fore.RED + "notes are empty.....")
+                    break
                 while True:
+                    if not utils.return_all_notes_elemans_custom(1):
+                        print(Fore.RED + "notes are empty.....")
+                        break
                     try:
                         id_choice = int(
                             input("Enter the ID of the note you want to edit: ")
@@ -323,7 +329,7 @@ while True:
                         doc = nlp(all_notes_text)
                         all_notes_list = [sent.text for sent in doc.sents]
                         print(
-                            f"there are {len(all_notes_list)} sentence on notes was write in notebook app...\n"
+                            f"\n{Fore.GREEN}there are {Fore.RED}{len(all_notes_list)}{Fore.GREEN} sentence on notes was write in notebook app...\n"
                         )
                         utils.build_log(
                             username=username, message="Viewed number of sentence "
@@ -375,8 +381,7 @@ while True:
                             sent.text for sent in doc.sents
                         ]
                         print(
-                            Fore.BLUE
-                            + f"there are {len(user_choice_note_sentences_list)} sentence on this note\n"
+                            f"\n{Fore.GREEN}there are {Fore.RED}{len(user_choice_note_sentences_list)}{Fore.GREEN} sentence on notes was write in notebook Note...\n"
                         )
                         print(
                             Fore.BLUE
@@ -421,8 +426,7 @@ while True:
                             token.text for token in doc if not token.is_punct
                         ]
                         print(
-                            Fore.BLUE
-                            + f"\nthere are {len(text_words_list)} words on notes was write in notebook app...\n"
+                            f"\n{Fore.GREEN}there are {Fore.RED}{len(text_words_list)}{Fore.GREEN}words on notes was write in notebook app...\n"
                         )
                         print(
                             Fore.BLUE
@@ -475,9 +479,9 @@ while True:
                         custom_words_list = [
                             token.text for token in doc if not token.is_punct
                         ]
+
                         print(
-                            Fore.BLUE
-                            + f"\nthere are {len(custom_words_list)} words on notes was write in notebook app...\n"
+                            f"\n{Fore.GREEN}there are {Fore.RED}{len(custom_words_list)}{Fore.GREEN} sentence on notes was write in notebook Note...\n"
                         )
                         print(
                             Fore.BLUE
@@ -500,7 +504,10 @@ while True:
                         input()
                         continue
                 elif user_choice == 3:  # Top Frequent Words
-                    models.top_frequent_words()
+                    try:
+                        models.top_frequent_words()
+                    except:
+                        continue
                     utils.build_log(
                         username=username, message="Viewd all number of words "
                     )
@@ -523,8 +530,11 @@ while True:
                         input()
                         continue
                     if tokenize_choice == 1:
-                        models.custom_tokenizer(my_token)
-                        input()
+                        try:
+                            models.custom_tokenizer(my_token)
+                            input()
+                        except:
+                            print(f"{Fore.RED} invalid tokenize...")
                     elif tokenize_choice == 2:
                         utils.print_all_notes()
                         try:
@@ -582,10 +592,13 @@ while True:
                     tuple_index = tuple(note_inverted_index.items())
                     print(utils.two_member_tuple_to_dictionary(tuple_index))
                     input(Fore.GREEN + "\n continue...")
+                else:
+                    break
                 inverted_index = utils.append_dictionary_to_dictionary(
                     inverted_index, note_inverted_index
                 )
                 utils.build_log(username=username, message="builded a inverted index")
+
             elif user_choice == "2":  #  Search Keyword
 
                 while True:

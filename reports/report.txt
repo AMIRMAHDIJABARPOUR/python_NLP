@@ -1,12 +1,12 @@
 Smart Notebook Report
-Generated at: 2025-08-17 07:53:06
+Generated at: 2025-08-17 09:26:32
 --------------------------------------------------
-Total Users: 50
-Total Notes: 494
-Total Words: 32737
+Total Users: 51
+Total Notes: 483
+Total Words: 32015
 Top 5 Frequent Words:
-  the: 3447
-  to: 2227
-  is: 1449
-  for: 1133
-  be: 767
+  the: 3366
+  to: 2171
+  is: 1424
+  for: 1106
+  be: 751

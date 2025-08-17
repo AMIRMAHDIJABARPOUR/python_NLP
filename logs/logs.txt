@@ -103,3 +103,34 @@
 2025-08-17 07:52:40 - Listed backups in backups/
 2025-08-17 07:53:06 - Text report generated: reports/report.txt
 2025-08-17 07:53:22 - Displayed log file: logs/logs.txt
+2025-08-17 08:01:32 - [34mUser Added  : [32mamirmahfla Added successfully
+2025-08-17 08:02:24 - Username edited for user3 to al;kdskjf by amirmahdi
+2025-08-17 08:02:32 - Password edited for user3 by amirmahdi
+2025-08-17 08:02:38 - User user3 updated by amirmahdi
+2025-08-17 08:03:17 - User user4 successfully deleted by amirmahdi
+2025-08-17 08:03:57 - [34muser : [32mView the list of useres 
+2025-08-17 08:04:22 - [34mamirmahdi : [32mSuccessfuly Added the note 
+2025-08-17 08:04:57 - [34mamirmahdi : [32msuccessfuly edited the  note 
+2025-08-17 08:05:12 - [34mamirmahdi : [32msuccessfuly deleted the  note 
+2025-08-17 08:09:15 - [34mamirmahdi : [32mViewed number of sentence 
+2025-08-17 08:09:33 - [34mamirmahdi : [32mViewed number of words 
+2025-08-17 08:09:47 - [34mamirmahdi : [32mviewed all noted words  
+2025-08-17 08:10:07 - [34mamirmahdi : [32mViewd all number of words 
+2025-08-17 08:11:44 - [34mamirmahdi : [32mbuilded a inverted index
+2025-08-17 08:11:47 - [34mamirmahdi : [32msearched
+2025-08-17 08:11:50 - [34mamirmahdi : [32mbuilded a inverted index
+2025-08-17 08:11:56 - [34mamirmahdi : [32mbuilded a inverted index
+2025-08-17 08:12:00 - Inverted index loaded: index/inverted_index.pkl
+2025-08-17 08:12:01 - [34mamirmahdi : [32mloaded a index
+2025-08-17 09:14:39 - [34mUser Added  : [32mamak;sdfjlaskjd Added successfully
+2025-08-17 09:16:51 - [34mamirmahdi : [32mViewed number of sentence 
+2025-08-17 09:17:01 - [34mamirmahdi : [32mviewed All notes sentence
+2025-08-17 09:19:04 - [34mamirmahdi : [32mViewed number of words 
+2025-08-17 09:24:48 - [34mamirmahdi : [32msearched
+2025-08-17 09:25:26 - [34mamirmahdi : [32mbuilded a inverted index
+2025-08-17 09:25:30 - [34mamirmahdi : [32msearched for a keyword
+2025-08-17 09:25:32 - [34mamirmahdi : [32msearched
+2025-08-17 09:25:50 - Backup restored: backups/backup_20250817_092544.zip
+2025-08-17 09:25:55 - Listed backups in backups/
+2025-08-17 09:26:32 - Text report generated: reports/report.txt
+2025-08-17 09:26:37 - Displayed log file: logs/logs.txt

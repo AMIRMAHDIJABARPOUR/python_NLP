@@ -138,13 +138,13 @@ def get_role_with_username(username):  # get user role with username
 
 def guss_password(true_password):  # chances to guss true password
     for guss_number in range(3, -1, -1):
-        guss = input(Fore.RED + "please enter your password: ")
+        guss = input(Fore.YELLOW + "please enter your password: ")
         if password_to_hash(guss) == true_password:
             return True
         elif guss_number <= 0:
             return False
         else:
-            print(f"invalid password {guss_number} left")
+            print(f"{Fore.RED}invalid password {guss_number} left")
 
 
 def update_userpass(
@@ -213,7 +213,10 @@ def get_notes():  # get subject and notes and tags(json.dumps(tags))
             continue
         else:
             temp_tags = list(big_tag.split(","))
-            tags = json.dumps(list(map(lambda item: item.strip(), temp_tags)))
+            try:
+                tags = json.dumps(list(map(lambda item: item.strip(), temp_tags)))
+            except:
+                tag = None
             break
     return subject, note, tags
 
@@ -269,8 +272,11 @@ def print_user_notes(username):  # Print notes Wrriten by user
             for i in range(0, len(note[3]), 80):
                 print(Fore.WHITE + note[3][i : i + 80])
             print(Fore.GREEN + "tags: ", end="")
-            for tag in json.loads(note[4]):
-                print(tag, end="  ")
+            try:
+                for tag in json.loads(note[4]):
+                    print(tag, end="  ")
+            except:
+                print(None)
             print(
                 "\n================================================================================\n"
             )
@@ -356,9 +362,12 @@ def check_note_ownership(note_id, username):  # Checks if the note belongs to th
         cursor = conn.cursor()
         cursor.execute("SELECT username FROM NOTES WHERE id = ?", (note_id,))
         result = cursor.fetchone()
-        if result and result[0] == username:
-            return True
-        else:
+        try:
+            if result and result[0] == username:
+                return True
+            else:
+                return False
+        except:
             return False
 
 
