@@ -3,6 +3,7 @@ from colorama import init, Fore, Style
 import models, utils, pyfiglet, sqlite3, time, spacy, logging
 import nltk
 
+nlp = spacy.load("en_core_web_sm")
 nltk.download("punkt_tab")
 inverted_index, search_status = defaultdict(list), defaultdict(list)
 logging.basicConfig(
@@ -301,7 +302,7 @@ while True:
                     continue
 
                 if user_choice == 1:  # Count Sentences
-                    nlp = spacy.load("en_core_web_sm")
+
                     print(
                         "[1] Count all sentences\n[2] Counting sentences in a specific note "
                     )
@@ -506,8 +507,12 @@ while True:
                 elif user_choice == 3:  # Top Frequent Words
                     try:
                         models.top_frequent_words()
-                    except:
-                        continue
+                    except Exception as e:  # تغییر از except ساده به گرفتن خطا
+                        print(
+                            Fore.RED + f"Error in Top Frequent Words: {str(e)}"
+                        )  # چاپ خطا برای عیب‌یابی
+                        input()
+
                     utils.build_log(
                         username=username, message="Viewd all number of words "
                     )
@@ -599,7 +604,7 @@ while True:
                 )
                 utils.build_log(username=username, message="builded a inverted index")
 
-            elif user_choice == "2":  #  Search Keyword
+            elif user_choice == "2":  # Search Keyword
 
                 while True:
                     user_search = input(Fore.GREEN + "What are you looking for? ")

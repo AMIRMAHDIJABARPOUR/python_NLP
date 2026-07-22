@@ -134,3 +134,66 @@
 2025-08-17 09:25:55 - Listed backups in backups/
 2025-08-17 09:26:32 - Text report generated: reports/report.txt
 2025-08-17 09:26:37 - Displayed log file: logs/logs.txt
+2025-10-19 22:07:20 - [34mUser Added  : [32mmahdi Added successfully
+2025-10-19 22:07:51 - [34mmahdi : [32m Viewed the note 
+2025-10-19 22:11:03 - [34mmahdi : [32mbuilded a inverted index
+2025-10-19 22:11:31 - [34mmahdi : [32msearched for a keyword
+2025-10-19 22:11:36 - [34mmahdi : [32msearched
+2025-10-19 22:11:41 - Inverted index loaded: index/inverted_index.pkl
+2025-10-19 22:11:45 - [34mmahdi : [32mloaded a index
+2025-10-19 22:13:58 - [34mUser Added  : [32madmin Added successfully
+2025-10-19 22:14:51 - [34muser : [32mView the list of useres 
+2025-10-19 22:15:56 - [34mmahdi : [32mSuccessfuly Added the note 
+2025-10-19 22:16:27 - [34mmahdi : [32msuccessfuly deleted the  note 
+2025-10-19 22:16:37 - [34mmahdi : [32m Viewed the note 
+2025-10-19 22:27:16 - [34mmahdi : [32mViewed number of sentence 
+2025-10-19 22:28:30 - [34mmahdi : [32mViewed number of sentence 
+2025-10-19 22:28:49 - [34mmahdi : [32mviewed All notes sentence
+2025-10-19 22:28:59 - [34mmahdi : [32mViewed all words 
+2025-10-19 22:29:10 - [34mmahdi : [32mViewed number of words 
+2025-10-19 22:29:17 - [34mmahdi : [32mviewed all noted words  
+2025-10-19 22:34:22 - [34mmahdi : [32mViewd all number of words 
+2025-10-19 22:40:28 - [34mmahdi : [32mViewd all number of words 
+2025-10-19 22:40:58 - [34mmahdi : [32mbuilded a inverted index
+2025-10-19 22:41:03 - Inverted index loaded: index/inverted_index.pkl
+2025-10-19 22:41:05 - [34mmahdi : [32mloaded a index
+2025-10-19 22:41:10 - [34mmahdi : [32mbuilded a inverted index
+2025-10-19 22:41:21 - [34mmahdi : [32msearched
+2025-10-19 22:41:27 - [34mmahdi : [32msearched for a keyword
+2025-10-19 22:41:40 - [34mmahdi : [32msearched
+2025-10-19 22:41:51 - [34mmahdi : [32mbuilded a inverted index
+2025-10-19 22:42:02 - [34mmahdi : [32msearched for a keyword
+2025-10-19 22:42:04 - [34mmahdi : [32msearched
+2025-10-19 22:42:09 - [34mmahdi : [32mbuilded a inverted index
+2025-10-19 22:42:40 - Text report generated: reports/report.txt
+2025-10-19 22:43:22 - Displayed log file: logs/logs.txt
+2025-10-19 22:43:51 - [34mmahdi : [32mViewed number of sentence 
+2025-10-19 22:43:53 - [34mmahdi : [32mviewed All notes sentence
+2025-10-19 22:44:03 - [34mmahdi : [32mViewed number of words 
+2025-10-19 22:44:07 - [34mmahdi : [32mviewed all noted words  
+2025-10-19 22:51:21 - [34mmahdi : [32mViewd all number of words 
+2025-10-19 22:53:05 - [34mmahdi : [32m Viewed the note 
+2025-10-19 22:53:41 - [34mmahdi : [32mViewed number of sentence 
+2025-10-19 22:53:45 - [34mmahdi : [32mviewed All notes sentence
+2025-10-19 22:54:18 - Inverted index loaded: index/inverted_index.pkl
+2025-10-19 22:54:24 - [34mmahdi : [32mloaded a index
+2025-10-19 22:54:36 - [34mmahdi : [32mbuilded a inverted index
+2025-10-19 22:54:43 - [34mmahdi : [32msearched for a keyword
+2025-10-19 22:54:55 - [34mmahdi : [32msearched
+2025-10-19 22:55:05 - [34mmahdi : [32msearched
+2025-10-19 22:55:10 - [34mmahdi : [32mbuilded a inverted index
+2025-10-19 22:55:17 - Inverted index loaded: index/inverted_index.pkl
+2025-10-19 22:55:18 - [34mmahdi : [32mloaded a index
+2025-10-19 22:55:36 - [34mmahdi : [32mbuilded a inverted index
+2025-10-20 10:46:02 - [34muser : [32mView the list of useres 
+2025-10-20 10:46:23 - [34mmahdi : [32m Viewed the note 
+2026-07-22 16:41:03 - [34mUser Added  : [32mtesty Added successfully
+2026-07-22 16:41:11 - [34muser : [32mView the list of useres 
+2026-07-22 18:14:22 - [34mtesty : [32msuccessfuly edited the  note 
+2026-07-22 18:14:44 - [34mtesty : [32m Viewed the note 
+2026-07-22 18:16:38 - [34mtesty : [32mViewed number of sentence 
+2026-07-22 18:16:42 - [34mtesty : [32mviewed All notes sentence
+2026-07-22 18:17:38 - [34mtesty : [32mViewed all words 
+2026-07-22 18:18:11 - [34mtesty : [32mViewd all number of words 
+2026-07-22 18:19:09 - [34mtesty : [32msearched
+2026-07-22 18:19:38 - [34mtesty : [32msearched

@@ -1,11 +1,10 @@
 import utils, spacy, sqlite3, re, json, sys, pickle, zipfile, os, time, logging, argparse, shutil, datetime, spacy
 from colorama import init, Fore, Style
 from collections import Counter, defaultdict
-
+nlp = spacy.load("en_core_web_sm")
 
 init(autoreset=True)
 ################################################section one#########################################################
-
 
 def add_user():  # add user function
 
@@ -238,6 +237,7 @@ def delete_note(id_choice):  # delete note by getting note id
 def top_frequent_words():  # print frequent word
     all_words_dictionary = dict()
     nlp = spacy.load("en_core_web_sm")
+
     print(Fore.BLUE + "[1] for all notes\n[2] for a spacific note ")
     while True:
         try:
@@ -259,7 +259,8 @@ def top_frequent_words():  # print frequent word
         for note in all_text_notes:
             text += note[0]
         doc = nlp(text)
-        text_words_list = [token.text for token in doc if not token.is_punct]
+        text_words_list = [token.text.lower() for token in doc if not token.is_punct and not token.is_stop]  # Filter out stop words and punctuation, convert to lowercase
+
         text_words_dictianary = Counter(text_words_list)
         print(Fore.BLUE + "here the top three words in all notes")
         most_common_tuple_list = text_words_dictianary.most_common()
@@ -295,7 +296,8 @@ def top_frequent_words():  # print frequent word
         nlp = spacy.load("en_core_web_sm")
         note_text = note[0][0]
         doc = nlp(note_text)
-        custom_words_list = [token.text for token in doc if not token.is_punct]
+        custom_words_list = [token.text.lower() for token in doc if
+                             not token.is_punct and not token.is_stop]  # Filter out stop words and punctuation, convert to lowercasecustom_words_list = [token.text.lower() for token in doc if not token.is_punct and not token.is_stop]  # Filter out stop words and punctuation, convert to lowercase
         custom_words_dictionary = Counter(custom_words_list)
         print(Fore.BLUE + "here the top three words in this note")
         custom_words_tuple = custom_words_dictionary.most_common()

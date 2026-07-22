@@ -1,2 +1,61 @@
 test.py
 text.html
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+
+
+
+# IDE files
+.idea/
+
+
+# SQLite databases
+*.db
+*.sqlite
+*.sqlite3
+db/*
+!db/.gitkeep
+
+# Logs
+*.log
+logs/*
+!logs/.gitkeep
+
+# Backups
+backups/*
+!backups/.gitkeep
+
+# Saved indexes
+index/*
+!index/.gitkeep
+*.pkl
+*.pickle
+
+# Generated reports
+reports/*
+!reports/.gitkeep
+
+# Test and coverage files
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# Build files
+build/
+dist/
+*.egg-info/
+
+# Operating system files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Project archives and assignment files
+*.zip
+Python-Project-NLP.pdf
